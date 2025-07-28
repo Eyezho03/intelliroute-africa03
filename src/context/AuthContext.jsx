@@ -1,35 +1,42 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+// context/AuthContext.jsx
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-
-  // Persistent auth: check localStorage on mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) setUser(JSON.parse(storedUser));
-  }, []);
-
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const [loading, setLoading] = useState(true);
+  
+  // Add this function to your context
+  const refreshAuth = async () => {
+    setLoading(true);
+    try {
+      // Implement your actual token verification logic here
+      const userData = await verifyToken(); 
+      setUser(userData);
+    } catch (error) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   };
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-  };
-  // Allow updating user (for editable dashboards)
-  const updateUser = (newUser) => {
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
+
+  // Other auth functions (login, logout, etc.)
+
+  const value = {
+    user,
+    loading,
+    refreshAuth,
+    // ...other auth functions
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => useContext(AuthContext);
+}

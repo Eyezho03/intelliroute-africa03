@@ -7,6 +7,8 @@ import FleetManagerDashboard from './pages/FleetManagerDashboard';
 import DriverDashboard from './pages/DriverDashboard';
 import AdminPanel from './pages/AdminPanel';
 
+
+// Components for Home Page Layout
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import Features from './components/Features';
@@ -15,7 +17,7 @@ import Testimonials from './components/Testimonials';
 import Onboarding from './components/Onboarding';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
-import Pricing from './components/Pricing';
+// import Pricing from './components/Pricing'; // You can uncomment later if needed
 
 const HomeLayout = () => (
   <>
@@ -26,9 +28,9 @@ const HomeLayout = () => (
     <section id="features">
       <Features />
     </section>
-    <section id="pricing">
+    {/* <section id="pricing">
       <Pricing />
-    </section>
+    </section> */}
     <section id="about">
       <AboutUs />
     </section>
@@ -48,18 +50,14 @@ const HomeLayout = () => (
 const App = () => {
   return (
     <Routes>
-      {/* Home Page Route */}
       <Route path="/" element={<HomeLayout />} />
-
-      {/* Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-
-      {/* Dashboard Route */}
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/dashboard/fleet-manager" element={<FleetManagerDashboard />} />
       <Route path="/dashboard/driver" element={<DriverDashboard />} />
       <Route path="/dashboard/admin" element={<AdminPanel />} />
+      >
     </Routes>
   );
 };
