@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bar, Line, Doughnut } from 'react-chartjs-2';
+import { Bar, Line, Doughnut } from 'react-chartjs-2/dist/react-chartjs-2.esm';
 import {
   Chart as ChartJS,
   CategoryScale,

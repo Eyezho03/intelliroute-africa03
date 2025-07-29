@@ -10,7 +10,15 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
-      external: ['react-chartjs-2', 'chart.js'], // 👈 Externalize problematic modules
-    },
+      external: [
+
+      ],
+    }
   },
+  optimizeDeps: {
+    include: [
+      'react-chartjs-2',
+      'chart.js'
+    ]
+  }
 });
