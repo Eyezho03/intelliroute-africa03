@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import logo from '../assets/intellirouteafrica5.jpg';
+import { useAuth } from '../context/AuthContext';
 import { 
   Menu, 
   X, 
@@ -12,8 +13,9 @@ import {
   ChevronDown,
   Search
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+
 import { Link, useNavigate } from 'react-router-dom';
+import NotificationSystem from './NotificationSystem';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,12 +32,13 @@ const Navbar = () => {
   const handleLogin = () => {
     login({ 
       name: 'Eyezho',
-      role: 'Operations Manager',
+      role: 'Fleet Manager',
       company: 'TransAfrica Logistics'
     });
     navigate('/dashboard');
   };
 
+  // Click outside handlers for menus
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -50,6 +53,7 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Logistics-focused menu items
   const menuItems = [
     { name: 'Live Tracking', href: '#tracking', icon: <MapPin size={16} /> },
     { name: 'Fleet Management', href: '#fleet', icon: <Truck size={16} /> },
@@ -60,6 +64,7 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-8 lg:px-16 py-3 bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 shadow-xl">
+      {/* Logo with tagline */}
       <div className="flex items-center font-bold text-white gap-2">
         <img 
           src={logo} 
@@ -79,6 +84,7 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Desktop Search & Navigation */}
       <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -90,6 +96,7 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Desktop Navigation */}
       <nav className="hidden md:flex gap-6 text-sm text-gray-300">
         {menuItems.map((item, idx) => (
           <a 
@@ -104,13 +111,9 @@ const Navbar = () => {
         ))}
       </nav>
 
+      {/* Desktop User Area */}
       <div className="hidden md:flex items-center gap-5">
-        <button className="relative p-1.5 text-gray-300 hover:text-white">
-          <Bell className="h-5 w-5" />
-          {notifications.some(n => !n.read) && (
-            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-          )}
-        </button>
+        <NotificationSystem />
         
         {!user ? (
           <button
@@ -175,6 +178,7 @@ const Navbar = () => {
         )}
       </div>
 
+      {/* Mobile Menu Toggle */}
       <div className="md:hidden z-50">
         <button 
           onClick={() => setIsOpen(!isOpen)}
@@ -188,6 +192,7 @@ const Navbar = () => {
         </button>
       </div>
 
+      {/* Mobile Menu */}
       {isOpen && (
         <div 
           ref={menuRef} 
@@ -205,50 +210,70 @@ const Navbar = () => {
           </div>
           
           <div className="flex-1 overflow-y-auto py-4 px-4">
-            {menuItems.map((item, idx) => (
-              <a 
-                key={idx} 
-                href={item.href} 
-                className="flex items-center gap-3 py-3 text-gray-300 hover:text-white border-b border-gray-800"
-              >
-                {item.icon && <span className="text-emerald-400">{item.icon}</span>}
-                <span>{item.name}</span>
-              </a>
-            ))}
-            <div className="mt-6">
-              {!user ? (
-                <button
-                  onClick={handleLogin}
-                  className="w-full py-2 bg-gradient-to-r from-green-600 to-emerald-500 text-white font-medium rounded-lg hover:scale-[1.03] transition-transform duration-300 flex items-center justify-center gap-2"
-                >
-                  <User size={16} />
-                  <span>Login</span>
-                </button>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  <Link 
-                    to="/dashboard" 
-                    className="flex items-center gap-2 py-2 px-3 bg-gray-800 text-gray-300 hover:text-white rounded-lg"
+            <div className="mb-6">
+              <h3 className="text-xs uppercase text-gray-500 font-semibold pl-3 mb-2">Navigation</h3>
+              <div className="space-y-1">
+                {menuItems.map((item, idx) => (
+                  <a
+                    key={idx}
+                    href={item.href}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-white"
+                    onClick={() => setIsOpen(false)}
                   >
-                    <User size={16} className="text-emerald-400" />
-                    Dashboard
-                  </Link>
-                  <Link 
-                    to="/settings" 
-                    className="flex items-center gap-2 py-2 px-3 bg-gray-800 text-gray-300 hover:text-white rounded-lg"
-                  >
-                    <Settings size={16} className="text-emerald-400" />
-                    Settings
-                  </Link>
-                  <button
-                    onClick={logout}
-                    className="w-full py-2 bg-gray-750 hover:bg-gray-700 text-white text-sm font-medium rounded-md"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+                    {item.icon}
+                    <span className="font-medium">{item.name}</span>
+                  </a>
+                ))}
+              </div>
             </div>
+            
+            {user && (
+              <div className="mb-6">
+                <h3 className="text-xs uppercase text-gray-500 font-semibold pl-3 mb-2">User</h3>
+                <div className="space-y-1">
+                  <Link
+                    to="/dashboard"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-white"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <User size={18} />
+                    <span>Dashboard</span>
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-white"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Settings size={18} />
+                    <span>Settings</span>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="p-4 border-t border-gray-800 bg-gray-850">
+            {!user ? (
+              <button
+                onClick={() => {
+                  handleLogin();
+                  setIsOpen(false);
+                }}
+                className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-500 text-white font-medium rounded-lg"
+              >
+                Login
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  logout();
+                  setIsOpen(false);
+                }}
+                className="w-full py-3 bg-gray-800 hover:bg-gray-750 text-white font-medium rounded-lg"
+              >
+                Logout
+              </button>
+            )}
           </div>
         </div>
       )}

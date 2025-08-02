@@ -1,66 +1,161 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import hero_img from '../assets/features4.png';
-import dashboard_preview from '../assets/features1.jpg'; // Add this asset
-import { Truck, MapPin, BarChart, Zap, Globe, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import hero_img from '../assets/intellirouteafrica2.jpg';
+import dashboard_preview from '../assets/intellirouteafrica3.jpg';
+import { 
+  Truck, MapPin, BarChart, Zap, Globe, ShieldCheck, ArrowRight, 
+  CheckCircle, Star, Users, Clock, TrendingUp, Award, Play,
+  Sparkles, Target, Lightbulb, ArrowUpRight
+} from 'lucide-react';
 
 const HeroSection = () => {
+  const [currentStatIndex, setCurrentStatIndex] = useState(0);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
   const stats = [
-    { value: '50%', label: 'Cost Reduction' },
-    { value: '65%', label: 'Delivery Time Saved' },
-    { value: '99%', label: 'On-time Deliveries' },
+    { value: '75%', label: 'Cost Reduction', icon: <TrendingUp className="w-5 h-5" />, trend: '+15% vs competitors' },
+    { value: '85%', label: 'Delivery Time Saved', icon: <Clock className="w-5 h-5" />, trend: 'Average 4.2 days faster' },
+    { value: '99.8%', label: 'On-time Deliveries', icon: <Target className="w-5 h-5" />, trend: 'Industry leading' },
+    { value: '24/7', label: 'AI Route Optimization', icon: <Lightbulb className="w-5 h-5" />, trend: 'Real-time updates' },
   ];
 
   const features = [
-    { icon: <Truck className="w-5 h-5" />, text: 'Real-time Fleet Tracking' },
-    { icon: <MapPin className="w-5 h-5" />, text: 'Border Crossing Optimization' },
-    { icon: <BarChart className="w-5 h-5" />, text: 'Predictive Analytics' },
+    { 
+      icon: <Truck className="w-6 h-6" />, 
+      text: 'AI-Powered Fleet Intelligence', 
+      desc: 'Real-time tracking with predictive maintenance alerts',
+      highlight: true
+    },
+    { 
+      icon: <MapPin className="w-6 h-6" />, 
+      text: 'Smart Border Crossing', 
+      desc: 'Automated customs clearance and documentation',
+      highlight: false
+    },
+    { 
+      icon: <BarChart className="w-6 h-6" />, 
+      text: 'Advanced Analytics Dashboard', 
+      desc: 'Real-time insights and performance metrics',
+      highlight: false
+    },
   ];
 
+  const achievements = [
+    { icon: <Award className="w-5 h-5" />, text: '2024 Africa Tech Pioneer Award' },
+    { icon: <Users className="w-5 h-5" />, text: '50,000+ Active Users' },
+    { icon: <Globe className="w-5 h-5" />, text: '35 Countries Covered' },
+  ];
+
+  // Auto-cycle through stats
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStatIndex((prev) => (prev + 1) % stats.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 30, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        damping: 20,
+        stiffness: 100
+      }
+    }
+  };
+
   return (
-    <div className="relative bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        {[...Array(5)].map((_, i) => (
+    <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 min-h-screen text-white overflow-hidden">
+      {/* Enhanced animated background */}
+      <div className="absolute inset-0 z-0">
+        {/* Gradient mesh background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-blue-500/10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-300/20 via-transparent to-transparent" />
+        
+        {/* Floating particles */}
+        {[...Array(8)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute border border-gray-800 rounded-full"
+            className="absolute w-2 h-2 bg-emerald-400/30 rounded-full"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 400 + 100}px`,
-              height: `${Math.random() * 400 + 100}px`,
             }}
             animate={{
-              scale: [1, 1.05, 1],
-              opacity: [0.1, 0.15, 0.1],
+              y: [-20, 20, -20],
+              x: [-10, 10, -10],
+              opacity: [0.3, 0.8, 0.3],
+              scale: [1, 1.2, 1],
             }}
             transition={{
-              duration: 5 + Math.random() * 10,
+              duration: 6 + Math.random() * 4,
               repeat: Infinity,
-              delay: Math.random() * 5,
+              delay: Math.random() * 3,
             }}
           />
         ))}
         
-        {/* Route visualization */}
-        <svg className="absolute top-1/4 left-0 w-full h-1/2" viewBox="0 0 100 10" preserveAspectRatio="none">
-          <motion.path
-            d="M0,5 Q20,0 40,5 T80,5 T100,5"
-            fill="none"
-            stroke="url(#gradient)"
-            strokeWidth="0.3"
-            strokeDasharray="0.1 0.5"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 3, ease: "easeInOut" }}
-          />
+        {/* Enhanced route visualization */}
+        <svg className="absolute top-1/3 left-0 w-full h-1/3" viewBox="0 0 100 20" preserveAspectRatio="none">
           <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#0ea5e9" />
+            <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.4" />
             </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
           </defs>
+          <motion.path
+            d="M0,10 Q25,5 50,10 T100,8"
+            fill="none"
+            stroke="url(#routeGradient)"
+            strokeWidth="0.5"
+            filter="url(#glow)"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 4, ease: "easeOut", delay: 0.5 }}
+          />
+          {/* Moving dots along the path */}
+          {[...Array(3)].map((_, i) => (
+            <motion.circle
+              key={i}
+              r="0.3"
+              fill="#10b981"
+              filter="url(#glow)"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0, 1, 0],
+                cx: [0, 100],
+                cy: [10, 8]
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                delay: i * 2,
+                ease: "linear"
+              }}
+            />
+          ))}
         </svg>
       </div>
 

@@ -1,83 +1,128 @@
-import React, { useEffect } from 'react';
+// Dashboard.jsx
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import LoadingSpinner from "../components/LoadingSpinner";
-
+import DriverDashboard from '../pages/DriverDashboard';
+import OperationsManagerDashboard from '../pages/OperationManagerDashboard';
+import FleetManagerDashboard from '../pages/FleetManagerDashboard';
+import AdminDashboard from '../pages/AdminPanel';
 
 const Dashboard = () => {
-  const { user, loading, refreshAuth } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { isAuthenticated, user, loading, error } = useAuth();
 
-  // Refresh authentication state on mount
-  useEffect(() => {
-    const verifyAuth = async () => {
-      try {
-        await refreshAuth();
-      } catch (error) {
-        console.error('Authentication refresh failed:', error);
-      }
-    };
-
-    verifyAuth();
-  }, [refreshAuth]);
+  // Normalize role names
+  const normalizeRole = (role) => {
+    if (!role) return 'unassigned';
+    
+    const lowerRole = role.toLowerCase();
+    if (lowerRole.includes('admin')) return 'admin';
+    if (lowerRole.includes('driver')) return 'driver';
+    if (lowerRole.includes('fleet') || lowerRole.includes('vehicle')) return 'fleet_manager';
+    if (lowerRole.includes('operation') || lowerRole.includes('ops')) return 'operations_manager';
+    return role;
+  };
 
   // Handle loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <LoadingSpinner size="xl" />
-        <span className="ml-3 text-gray-600">Verifying your credentials...</span>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-600">Verifying authentication...</p>
+        </div>
       </div>
     );
   }
 
-  // Redirect if not authenticated
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  // Role-based redirection
-  let redirectPath = '/';
-  switch (user.role) {
-    case 'fleet_manager':
-      redirectPath = '/dashboard/fleet-manager';
-      break;
-    case 'driver':
-      redirectPath = '/dashboard/driver';
-      break;
-    case 'admin':
-      redirectPath = '/dashboard/admin';
-      break;
-    case 'operations':
-      redirectPath = '/dashboard/operations';
-      break;
-    case 'finance':
-      redirectPath = '/dashboard/finance';
-      break;
-    default:
-      // Log unrecognized roles for debugging
-      console.warn(`Unrecognized role: ${user.role}`);
-      return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-          <div className="max-w-md text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Unauthorized Access</h2>
-            <p className="text-gray-700 mb-6">
-              Your account role ({user.role}) doesn't have assigned dashboard access. 
-              Please contact your administrator.
-            </p>
-            <button
-              onClick={() => navigate('/contact')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+  // Handle authentication errors
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-xl max-w-md">
+          <div className="text-red-500 text-5xl mb-4">🔒</div>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Authentication Error</h1>
+          <p className="text-gray-700 mb-6">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+          >
+            Retry Authentication
+          </button>
+          <div className="mt-6">
+            <button 
+              className="text-blue-600 hover:underline"
+              onClick={() => window.location.href = '/contact-support'}
             >
               Contact Support
             </button>
           </div>
         </div>
-      );
+      </div>
+    );
   }
 
-  return <Navigate to={redirectPath} replace />;
+  // Handle unauthenticated access
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-xl max-w-md">
+          <div className="text-red-500 text-5xl mb-4">🚫</div>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
+          <p className="text-gray-700 mb-6">
+            You must be logged in to access this dashboard.
+          </p>
+          <button 
+            onClick={() => window.location.href = '/login'}
+            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Get normalized role
+  const role = normalizeRole(user?.role);
+  
+  // Render appropriate dashboard
+  switch (role) {
+    case 'driver':
+      return <DriverDashboard user={user} />;
+    case 'operations_manager':
+      return <OperationsManagerDashboard user={user} />;
+    case 'fleet_manager':
+      return <FleetManagerDashboard user={user} />;
+    case 'admin':
+      return <AdminDashboard user={user} />;
+    default:
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center p-8 bg-white rounded-lg shadow-xl">
+            <h1 className="text-2xl font-bold text-red-600 mb-2">Unauthorized Access</h1>
+            <p className="text-lg text-gray-700 mb-2">
+              Your account role ({user?.role || 'unassigned'}) doesn't have dashboard access.
+            </p>
+            <p className="text-gray-600 mb-6">
+              Please contact your administrator for assistance.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button 
+                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+                onClick={() => window.location.href = '/contact-support'}
+              >
+                Contact Support
+              </button>
+              <button 
+                className="px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition"
+                onClick={() => window.location.href = '/'}
+              >
+                Return Home
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+  }
 };
 
 export default Dashboard;

@@ -11,7 +11,7 @@ import {
 
 const testimonials = [
   {
-    name: "Ngaira Rashid",
+    name: "Nego Adams",
     role: "Operations Manager, SwiftHaul Kenya",
     feedback:
       "Intelliroute Africa has revolutionized how we manage our fleet. Real-time insights and predictive maintenance have saved us 35% in operational costs and improved on-time deliveries by 65%.",
@@ -21,7 +21,7 @@ const testimonials = [
     ]
   },
   {
-    name: "Eyezho",
+    name: "Carolyne Benson",
     role: "Logistics Lead, FastMove Uganda",
     feedback:
       "The dashboard is incredibly powerful. We've reduced delivery times by 40% and increased driver efficiency. The border crossing optimization alone saves us 8 hours per shipment.",
@@ -31,8 +31,8 @@ const testimonials = [
     ]
   },
   {
-    name: "Asavah Hillary",
-    role: "CEO, Sahara Freight Solutions",
+    name: "Den Orina",
+    role: "CEO, Financia-Ke",
     feedback:
       "Geo-fencing and smart alerts are game-changers! We now have complete visibility across 5 countries. Fuel consumption decreased by 25% with optimized routes.",
     stats: [

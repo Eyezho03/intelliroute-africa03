@@ -13,6 +13,20 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import {
+  Truck,
+  MapPin,
+  Settings,
+  Download,
+  FileText,
+  Bell,
+  RefreshCw,
+  BarChart3,
+  Fuel,
+  Route,
+  Plus,
+  X
+} from 'lucide-react';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -210,9 +224,50 @@ const FleetManagerDashboard = () => {
     URL.revokeObjectURL(url);
   };
 
+  const [toast, setToast] = useState(null);
+
+  // Toast notification system
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const enhancedExportChart = (id) => {
+    exportChart(id);
+    showToast('Chart exported successfully!');
+  };
+
+  const enhancedExportCSV = (type) => {
+    exportCSV(type);
+    showToast(`${type} data exported to CSV!`);
+  };
+
   return (
-    <div className="bg-[#0e0e1a] min-h-screen text-white px-2 sm:px-4 md:px-8 py-4 md:py-8 max-w-5xl mx-auto">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-emerald-400">Fleet Manager Dashboard</h2>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 text-gray-200 p-4 md:p-6">
+      {/* Header */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
+            <Truck className="text-emerald-400" size={32} />
+            <span className="text-emerald-400">Fleet Manager</span>
+            <span className="text-gray-300">Dashboard</span>
+          </h1>
+          <p className="text-gray-400 mt-2 flex items-center gap-2">
+            <BarChart3 size={16} />
+            Comprehensive fleet management and analytics
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => showToast('Data refreshed!')}
+            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition"
+          >
+            <RefreshCw size={16} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </header>
       {/* Overview Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-8">
         <div className="bg-[#18182a] shadow rounded p-4 md:p-6 flex flex-col items-center min-w-0">

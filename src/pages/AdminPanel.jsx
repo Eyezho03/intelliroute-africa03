@@ -228,6 +228,18 @@ const AdminPanel = () => {
     }
   };
 
+  // Enhanced export with better quality
+  const exportChartHD = (id) => {
+    const canvas = document.getElementById(id);
+    if (canvas) {
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.download = `${id}-HD-${new Date().toISOString().split('T')[0]}.png`;
+      link.click();
+      showToast('Chart exported in HD quality');
+    }
+  };
+
   // CSV export
   const exportToCSV = (data, filename) => {
     let csv = '';

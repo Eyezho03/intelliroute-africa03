@@ -1,5 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Bar, Line, Doughnut } from 'react-chartjs-2/dist/react-chartjs-2.esm';
+import { Bar, Line } from "react-chartjs-2";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import { 
+  MapPin, 
+  Truck, 
+  AlertTriangle, 
+  Clock, 
+  Fuel, 
+  CheckCircle, 
+  Plus,
+  X,
+  Download,
+  RefreshCw,
+  Navigation,
+  Phone
+} from 'lucide-react';
+
+// Fix leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+});
+
+// Register Chart.js components
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -7,97 +34,126 @@ import {
   PointElement,
   LineElement,
   BarElement,
-  ArcElement,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend);
-
-const initialRoutes = [
-  { id: 1, name: 'Route A', status: 'In Progress' },
-  { id: 2, name: 'Route B', status: 'Pending' },
+const africanBorders = [
+  { id: 1, name: 'Namanga (KE-TZ)', status: 'Heavy Traffic', delay: '2.5 hours' },
+  { id: 2, name: 'Malaba (KE-UG)', status: 'Moderate', delay: '1 hour' },
+  { id: 3, name: 'Beitbridge (ZA-ZW)', status: 'Severe', delay: '4 hours' },
 ];
 
-const initialChecklist = [
-  { id: 1, task: 'Check vehicle', done: false },
-  { id: 2, task: 'Confirm cargo', done: false },
-  { id: 3, task: 'Start route', done: false },
+const africanChecklist = [
+  { id: 1, task: 'Verify border documents', done: false },
+  { id: 2, task: 'Check fuel levels', done: false },
+  { id: 3, task: 'Inspect refrigeration (if perishable)', done: false },
+  { id: 4, task: 'Confirm cargo security', done: false },
 ];
 
-const initialNotifications = [
-  { id: 1, message: 'New route assigned: Route B.' },
-  { id: 2, message: 'Complete your checklist before departure.' },
+const africanNotifications = [
+  { id: 1, message: 'Heavy rains expected in Nairobi region tomorrow' },
+  { id: 2, message: 'Road construction on A104 near Arusha' },
+  { id: 3, message: 'New border policy at Malaba crossing' },
 ];
 
-const defaultRouteLabels = ['Route A', 'Route B', 'Route C', 'Route D'];
-const defaultRouteData = [100, 80, 90, 70];
-const defaultActivityLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const defaultActivityData = [5, 7, 6, 8, 4, 9, 10];
-const chartTypes = ['line', 'bar', 'doughnut'];
+const africanRoutes = [
+  { 
+    id: 1, 
+    name: 'Mombasa to Kampala', 
+    status: 'In Progress',
+    distance: '1,100 km',
+    estimatedTime: '2 days',
+    borderCrossings: ['Namanga'],
+    progress: 65
+  },
+  { 
+    id: 2, 
+    name: 'Durban to Lusaka', 
+    status: 'Pending',
+    distance: '1,800 km',
+    estimatedTime: '3 days',
+    borderCrossings: ['Beitbridge'],
+    progress: 0
+  },
+];
 
-const STORAGE_KEY = 'driver_dashboard';
+const africanFuelPrices = [
+  { country: 'Kenya', diesel: 159.12, petrol: 145.30 },
+  { country: 'Tanzania', diesel: 142.50, petrol: 138.75 },
+  { country: 'Uganda', diesel: 148.00, petrol: 140.25 },
+  { country: 'Rwanda', diesel: 152.30, petrol: 147.80 },
+];
 
 const DriverDashboard = () => {
-  const [routes, setRoutes] = useState(initialRoutes);
-  const [checklist, setChecklist] = useState(initialChecklist);
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [routes, setRoutes] = useState(africanRoutes);
+  const [checklist, setChecklist] = useState(africanChecklist);
+  const [notifications, setNotifications] = useState(africanNotifications);
+  const [borderCrossings] = useState(africanBorders);
+  const [fuelPrices] = useState(africanFuelPrices);
   const [newRoute, setNewRoute] = useState('');
   const [newTask, setNewTask] = useState('');
   const [toast, setToast] = useState(null);
-  const [routeLabels, setRouteLabels] = useState(defaultRouteLabels);
-  const [routeData, setRouteData] = useState(defaultRouteData);
-  const [activityLabels, setActivityLabels] = useState(defaultActivityLabels);
-  const [activityData, setActivityData] = useState(defaultActivityData);
-  const [routeChartType, setRouteChartType] = useState('bar');
-  const [activityChartType, setActivityChartType] = useState('line');
-  const [routeColor, setRouteColor] = useState('#6366f1');
-  const [activityColor, setActivityColor] = useState('#10b981');
+  const [sosActive, setSosActive] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState({ lat: -1.2921, lng: 36.8219 }); // Nairobi coords
 
   // Load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem('african_dashboard');
     if (saved) {
-      const { routes, checklist, notifications, routeLabels, routeData, activityLabels, activityData } = JSON.parse(saved);
-      if (routes) setRoutes(routes);
-      if (checklist) setChecklist(checklist);
-      if (notifications) setNotifications(notifications);
-      if (routeLabels) setRouteLabels(routeLabels);
-      if (routeData) setRouteData(routeData);
-      if (activityLabels) setActivityLabels(activityLabels);
-      if (activityData) setActivityData(activityData);
+      const data = JSON.parse(saved);
+      if (data.routes) setRoutes(data.routes);
+      if (data.checklist) setChecklist(data.checklist);
+      if (data.notifications) setNotifications(data.notifications);
+    }
+    
+    // Simulate getting driver's location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        error => console.error("Geolocation error:", error)
+      );
     }
   }, []);
+
   // Save to localStorage on change
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ routes, checklist, notifications, routeLabels, routeData, activityLabels, activityData }));
-  }, [routes, checklist, notifications, routeLabels, routeData, activityLabels, activityData]);
-
-  // Connect analytics to dashboard actions (e.g., add to activityData when a task is completed)
-  useEffect(() => {
-    // Example: increment today's activity when a task is checked
-    // (Assume last label is today)
-    const completed = checklist.filter(t => t.done).length;
-    setActivityData(prev => [...prev.slice(0, -1), completed]);
-  }, [checklist]);
+    localStorage.setItem('african_dashboard', JSON.stringify({ 
+      routes, 
+      checklist, 
+      notifications 
+    }));
+  }, [routes, checklist, notifications]);
 
   // Add route
   const addRoute = () => {
     if (newRoute.trim()) {
-      setRoutes(prev => [...prev, { id: Date.now(), name: newRoute, status: 'Pending' }]);
+      const newRouteObj = {
+        id: Date.now(),
+        name: newRoute,
+        status: 'Pending',
+        distance: 'Calculating...',
+        estimatedTime: 'Calculating...',
+        borderCrossings: [],
+        progress: 0
+      };
+      setRoutes(prev => [...prev, newRouteObj]);
       setNewRoute('');
-      showToast('Route added!');
+      showToast('New route added!');
     }
   };
+
   // Remove route
   const removeRoute = (id) => {
     setRoutes(prev => prev.filter(r => r.id !== id));
     showToast('Route removed.');
-  };
-  // Edit route name
-  const editRoute = (id, name) => {
-    setRoutes(prev => prev.map(r => r.id === id ? { ...r, name } : r));
   };
 
   // Add checklist task
@@ -108,249 +164,410 @@ const DriverDashboard = () => {
       showToast('Task added!');
     }
   };
+
   // Remove checklist task
   const removeTask = (id) => {
     setChecklist(prev => prev.filter(t => t.id !== id));
     showToast('Task removed.');
   };
+
   // Toggle checklist
   const toggleTask = (id) => {
-    setChecklist(prev => prev.map(task => task.id === id ? { ...task, done: !task.done } : task));
-  };
-  // Edit checklist task
-  const editTask = (id, task) => {
-    setChecklist(prev => prev.map(t => t.id === id ? { ...t, task } : t));
+    setChecklist(prev => prev.map(task => 
+      task.id === id ? { ...task, done: !task.done } : task
+    ));
   };
 
   // Toast notification system
   const showToast = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 2000);
+    setTimeout(() => setToast(null), 3000);
   };
 
   // SOS button
   const handleSOS = () => {
-    showToast('SOS sent! Help is on the way.');
+    setSosActive(true);
+    showToast('🚨 Emergency alert sent with your location! Help is coming.');
+    setTimeout(() => setSosActive(false), 10000);
   };
 
-  // Chart data objects
-  const routeCompletionData = {
-    labels: routeLabels,
+  // Route progress chart data
+  const routeProgressData = {
+    labels: routes.map(route => route.name),
     datasets: [
       {
-        label: 'Completion Rate (%)',
-        data: routeData,
-        backgroundColor: routeColor,
-      },
-    ],
-  };
-  const userActivityData = {
-    labels: activityLabels,
-    datasets: [
-      {
-        label: 'Tasks Completed',
-        data: activityData,
-        borderColor: activityColor,
-        backgroundColor: [activityColor + '33', ...Array(activityData.length - 1).fill(activityColor + '11')],
-        tension: 0.4,
-        fill: true,
+        label: 'Route Progress (%)',
+        data: routes.map(route => route.progress),
+        backgroundColor: '#10b981',
+        borderColor: '#047857',
+        borderWidth: 1,
       },
     ],
   };
 
-  // Editable chart handlers
-  const handleRouteLabelChange = (i, value) => {
-    setRouteLabels(labels => labels.map((l, idx) => (idx === i ? value : l)));
-  };
-  const handleRouteDataChange = (i, value) => {
-    setRouteData(data => data.map((d, idx) => (idx === i ? Number(value) : d)));
-  };
-  const handleActivityLabelChange = (i, value) => {
-    setActivityLabels(labels => labels.map((l, idx) => (idx === i ? value : l)));
-  };
-  const handleActivityDataChange = (i, value) => {
-    setActivityData(data => data.map((d, idx) => (idx === i ? Number(value) : d)));
+  // Border crossing delays chart data
+  const borderDelayData = {
+    labels: borderCrossings.map(border => border.name),
+    datasets: [
+      {
+        label: 'Delay (hours)',
+        data: borderCrossings.map(border => parseFloat(border.delay.split(' ')[0])),
+        backgroundColor: '#f59e0b',
+        borderColor: '#d97706',
+        borderWidth: 1,
+      },
+    ],
   };
 
-  // Chart export to PNG
-  const exportChart = (id) => {
-    const chart = document.getElementById(id);
-    if (chart) {
-      const url = chart.toDataURL('image/png');
+  // Export chart data
+  const exportChart = (chartId) => {
+    const canvas = document.getElementById(chartId);
+    if (canvas) {
       const link = document.createElement('a');
-      link.href = url;
-      link.download = `${id}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.download = `${chartId}-${new Date().toISOString().split('T')[0]}.png`;
       link.click();
+      showToast('Chart exported successfully!');
     }
   };
 
-  // CSV export
-  const exportCSV = (type) => {
-    let csv = '';
-    if (type === 'route') {
-      csv += 'Label,Value\n';
-      routeLabels.forEach((l, i) => {
-        csv += `${l},${routeData[i]}\n`;
-      });
-    } else if (type === 'activity') {
-      csv += 'Label,Value\n';
-      activityLabels.forEach((l, i) => {
-        csv += `${l},${activityData[i]}\n`;
-      });
-    }
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${type}_analytics.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+  // Contact support
+  const contactSupport = () => {
+    showToast('Contacting support team...');
   };
+
+  const completedTasks = checklist.filter(task => task.done).length;
+  const totalTasks = checklist.length;
 
   return (
-    <div className="bg-[#0e0e1a] min-h-screen text-white px-2 sm:px-4 md:px-8 py-4 md:py-8 max-w-3xl mx-auto">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-emerald-400">Driver Dashboard</h2>
-      {/* Assigned Routes */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
-          <h3 className="text-lg md:text-xl font-semibold text-emerald-300">Assigned Routes</h3>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <input
-              type="text"
-              value={newRoute}
-              onChange={e => setNewRoute(e.target.value)}
-              placeholder="Add route..."
-              className="border-b-2 border-emerald-300 focus:outline-none px-2 py-1 w-full sm:w-auto text-sm md:text-base"
-            />
-            <button onClick={addRoute} className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 transition w-full sm:w-auto text-sm md:text-base">Add</button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 text-gray-200 p-4 md:p-6">
+      {/* Header */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
+            <Truck className="text-emerald-400" size={32} />
+            <span className="text-emerald-400">Driver</span>
+            <span className="text-gray-300">Dashboard</span>
+          </h1>
+          <p className="text-gray-400 mt-2 flex items-center gap-2">
+            <Navigation size={16} />
+            IntelliRoute Africa - Optimized logistics for East African corridors
+          </p>
         </div>
-        <div className="bg-[#18182a] shadow rounded p-4 min-w-0">
-          <ul className="space-y-1">
-            {routes.map(route => (
-              <li key={route.id} className="flex flex-col sm:flex-row justify-between items-center group hover:bg-emerald-50 px-2 rounded transition gap-2">
+        
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={contactSupport}
+            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition"
+          >
+            <Phone size={16} />
+            <span>Support</span>
+          </button>
+          <button 
+            onClick={handleSOS}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-lg transition-all ${
+              sosActive 
+                ? 'animate-pulse bg-red-700' 
+                : 'bg-red-600 hover:bg-red-700'
+            }`}
+          >
+            <AlertTriangle size={20} />
+            <span>SOS EMERGENCY</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Main Dashboard Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        
+        {/* Left Column - Routes & Checklist */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Assigned Routes */}
+          <div className="bg-[#18182a] rounded-xl shadow-lg p-5">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+              <h2 className="text-xl font-bold text-emerald-300 mb-2 sm:mb-0">
+                Active Transport Routes
+              </h2>
+              <div className="flex gap-2 w-full sm:w-auto">
                 <input
                   type="text"
-                  value={route.name}
-                  onChange={e => editRoute(route.id, e.target.value)}
-                  className="border-b border-gray-200 focus:outline-none px-1 mr-0 sm:mr-2 bg-transparent w-full sm:w-auto text-sm md:text-base"
+                  value={newRoute}
+                  onChange={e => setNewRoute(e.target.value)}
+                  placeholder="Add new route (e.g. Nairobi to Kigali)"
+                  className="border-b-2 border-emerald-300 focus:outline-none px-3 py-2 bg-[#222235] rounded w-full"
                 />
-                <span className="text-xs md:text-sm text-gray-500 mr-0 sm:mr-2">{route.status}</span>
-                <button onClick={() => removeRoute(route.id)} className="text-red-500 opacity-0 group-hover:opacity-100 transition text-sm md:text-base">Remove</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      {/* Task Checklist */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
-          <h3 className="text-lg md:text-xl font-semibold text-emerald-300">Task Checklist</h3>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <input
-              type="text"
-              value={newTask}
-              onChange={e => setNewTask(e.target.value)}
-              placeholder="Add task..."
-              className="border-b-2 border-emerald-300 focus:outline-none px-2 py-1 w-full sm:w-auto text-sm md:text-base"
-            />
-            <button onClick={addTask} className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 transition w-full sm:w-auto text-sm md:text-base">Add</button>
+                <button 
+                  onClick={addRoute} 
+                  className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 transition whitespace-nowrap"
+                >
+                  Add Route
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {routes.map(route => (
+                <div key={route.id} className="border border-gray-700 rounded-lg p-4 hover:border-emerald-500 transition">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-lg">{route.name}</h3>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="bg-gray-700 px-2 py-1 rounded text-sm">
+                          📏 {route.distance}
+                        </span>
+                        <span className="bg-gray-700 px-2 py-1 rounded text-sm">
+                          ⏱️ {route.estimatedTime}
+                        </span>
+                        <span className={`px-2 py-1 rounded text-sm ${
+                          route.status === 'In Progress' 
+                            ? 'bg-yellow-500 text-yellow-900' 
+                            : 'bg-blue-500 text-blue-900'
+                        }`}>
+                          {route.status}
+                        </span>
+                      </div>
+                      
+                      {route.borderCrossings.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm text-gray-400">Border Crossings:</p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {route.borderCrossings.map((border, idx) => (
+                              <span key={idx} className="bg-amber-900 px-2 py-1 rounded text-sm">
+                                {border}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <button 
+                      onClick={() => removeRoute(route.id)}
+                      className="text-red-500 hover:text-red-400 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Progress</span>
+                      <span>{route.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2.5">
+                      <div 
+                        className="bg-emerald-500 h-2.5 rounded-full" 
+                        style={{ width: `${route.progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Task Checklist */}
+          <div className="bg-[#18182a] rounded-xl shadow-lg p-5">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+              <h2 className="text-xl font-bold text-emerald-300 mb-2 sm:mb-0">
+                Pre-Journey Checklist
+              </h2>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <input
+                  type="text"
+                  value={newTask}
+                  onChange={e => setNewTask(e.target.value)}
+                  placeholder="Add custom task..."
+                  className="border-b-2 border-emerald-300 focus:outline-none px-3 py-2 bg-[#222235] rounded w-full"
+                />
+                <button 
+                  onClick={addTask} 
+                  className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 transition whitespace-nowrap"
+                >
+                  Add Task
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              {checklist.map(task => (
+                <div 
+                  key={task.id} 
+                  className={`flex items-center p-3 rounded-lg border ${
+                    task.done 
+                      ? 'border-emerald-500 bg-emerald-900/20' 
+                      : 'border-gray-700 hover:border-emerald-400'
+                  } transition`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={task.done}
+                    onChange={() => toggleTask(task.id)}
+                    className="h-5 w-5 accent-emerald-500 mr-3"
+                  />
+                  <span className={`flex-1 ${task.done ? 'line-through text-gray-500' : ''}`}>
+                    {task.task}
+                  </span>
+                  <button 
+                    onClick={() => removeTask(task.id)}
+                    className="text-red-500 hover:text-red-400 ml-2 transition"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        <ul className="bg-[#18182a] shadow rounded p-4 list-none min-w-0">
-          {checklist.map(task => (
-            <li key={task.id} className="flex flex-col sm:flex-row items-center mb-2 group hover:bg-emerald-50 px-2 rounded transition gap-2">
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={() => toggleTask(task.id)}
-                className="mr-2 accent-green-600"
+        
+        {/* Right Column - Map & Key Info */}
+        <div className="space-y-6">
+          {/* Route Map */}
+          <div className="bg-[#18182a] rounded-xl shadow-lg p-5 h-96">
+            <h2 className="text-xl font-bold text-emerald-300 mb-4">
+              Current Location
+            </h2>
+            <MapContainer 
+              center={[currentLocation.lat, currentLocation.lng]} 
+              zoom={8} 
+              className="h-full rounded-lg"
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <input
-                type="text"
-                value={task.task}
-                onChange={e => editTask(task.id, e.target.value)}
-                className={"border-b border-gray-200 focus:outline-none px-1 bg-transparent flex-1 w-full sm:w-auto text-sm md:text-base " + (task.done ? 'line-through text-gray-400' : '')}
-              />
-              <button onClick={() => removeTask(task.id)} className="ml-2 text-red-500 opacity-0 group-hover:opacity-100 transition text-sm md:text-base">Remove</button>
-            </li>
+              <Marker position={[currentLocation.lat, currentLocation.lng]}>
+                <Popup>
+                  Your current position<br />
+                  {new Date().toLocaleTimeString()}
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+          
+          {/* Border Crossing Info */}
+          <div className="bg-[#18182a] rounded-xl shadow-lg p-5">
+            <h2 className="text-xl font-bold text-emerald-300 mb-4">
+              Border Crossing Status
+            </h2>
+            <div className="space-y-3">
+              {borderCrossings.map(border => (
+                <div key={border.id} className="border border-gray-700 rounded-lg p-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold">{border.name}</h3>
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      border.status === 'Heavy Traffic' 
+                        ? 'bg-red-500 text-red-900' 
+                        : border.status === 'Severe' 
+                          ? 'bg-red-700 text-red-100'
+                          : 'bg-yellow-500 text-yellow-900'
+                    }`}>
+                      {border.status}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm">Delay: {border.delay}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Fuel Prices */}
+          <div className="bg-[#18182a] rounded-xl shadow-lg p-5">
+            <h2 className="text-xl font-bold text-emerald-300 mb-4">
+              Regional Fuel Prices (KES/L)
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="py-2 text-left">Country</th>
+                    <th className="py-2 text-right">Diesel</th>
+                    <th className="py-2 text-right">Petrol</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fuelPrices.map((fuel, idx) => (
+                    <tr key={idx} className="border-b border-gray-800 last:border-0">
+                      <td className="py-2">{fuel.country}</td>
+                      <td className="py-2 text-right">KES {fuel.diesel.toFixed(2)}</td>
+                      <td className="py-2 text-right">KES {fuel.petrol.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-[#18182a] rounded-xl shadow-lg p-5">
+          <h2 className="text-xl font-bold text-emerald-300 mb-4">
+            Route Progress
+          </h2>
+          <Bar 
+            data={routeProgressData} 
+            options={{ 
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+              },
+              scales: {
+                y: {
+                  max: 100,
+                  title: { display: true, text: 'Completion %' }
+                }
+              }
+            }} 
+          />
+        </div>
+        
+        <div className="bg-[#18182a] rounded-xl shadow-lg p-5">
+          <h2 className="text-xl font-bold text-emerald-300 mb-4">
+            Border Crossing Delays
+          </h2>
+          <Line 
+            data={borderDelayData} 
+            options={{ 
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+              },
+              scales: {
+                y: {
+                  title: { display: true, text: 'Hours delay' }
+                }
+              }
+            }} 
+          />
+        </div>
+      </div>
+      
+      {/* Notifications */}
+      <div className="bg-[#18182a] rounded-xl shadow-lg p-5 mb-8">
+        <h2 className="text-xl font-bold text-emerald-300 mb-4">
+          Logistics Notifications
+        </h2>
+        <div className="space-y-3">
+          {notifications.map(notification => (
+            <div key={notification.id} className="border-l-4 border-emerald-500 pl-4 py-2">
+              <p>{notification.message}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {new Date().toLocaleDateString()} • Regional Update
+              </p>
+            </div>
           ))}
-        </ul>
-      </div>
-      {/* Analytics Charts */}
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-        <div className="bg-[#18182a] shadow rounded p-4 min-w-0 overflow-x-auto">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold">Route Completion Rates</h3>
-            <div className="flex gap-2">
-              <select value={routeChartType} onChange={e => setRouteChartType(e.target.value)} className="border rounded px-2 py-1">
-                {chartTypes.map(type => <option key={type} value={type}>{type}</option>)}
-              </select>
-              <input type="color" value={routeColor} onChange={e => setRouteColor(e.target.value)} title="Chart Color" />
-              <button onClick={() => exportChart('routeChart')} className="bg-emerald-600 text-white px-2 py-1 rounded">Export PNG</button>
-              <button onClick={() => exportCSV('route')} className="bg-blue-600 text-white px-2 py-1 rounded">Export CSV</button>
-            </div>
-          </div>
-          <div className="flex gap-2 mb-2">
-            {routeLabels.map((label, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <input value={label} onChange={e => handleRouteLabelChange(i, e.target.value)} className="w-14 text-xs border rounded mb-1 px-1" />
-                <input type="number" value={routeData[i]} onChange={e => handleRouteDataChange(i, e.target.value)} className="w-14 text-xs border rounded px-1" />
-              </div>
-            ))}
-          </div>
-          {routeChartType === 'line' && <Line id="routeChart" data={routeCompletionData} options={{ responsive: true, plugins: { legend: { display: false }, tooltip: { enabled: true } } }} />}
-          {routeChartType === 'bar' && <Bar id="routeChart" data={routeCompletionData} options={{ responsive: true, plugins: { legend: { display: false }, tooltip: { enabled: true } } }} />}
-          {routeChartType === 'doughnut' && <Doughnut id="routeChart" data={routeCompletionData} options={{ responsive: true, plugins: { legend: { display: false }, tooltip: { enabled: true } } }} />}
-        </div>
-        <div className="bg-[#18182a] shadow rounded p-4 min-w-0 overflow-x-auto">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold">User Activity (Tasks Completed)</h3>
-            <div className="flex gap-2">
-              <select value={activityChartType} onChange={e => setActivityChartType(e.target.value)} className="border rounded px-2 py-1">
-                {chartTypes.map(type => <option key={type} value={type}>{type}</option>)}
-              </select>
-              <input type="color" value={activityColor} onChange={e => setActivityColor(e.target.value)} title="Chart Color" />
-              <button onClick={() => exportChart('activityChart')} className="bg-emerald-600 text-white px-2 py-1 rounded">Export PNG</button>
-              <button onClick={() => exportCSV('activity')} className="bg-blue-600 text-white px-2 py-1 rounded">Export CSV</button>
-            </div>
-          </div>
-          <div className="flex gap-2 mb-2">
-            {activityLabels.map((label, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <input value={label} onChange={e => handleActivityLabelChange(i, e.target.value)} className="w-14 text-xs border rounded mb-1 px-1" />
-                <input type="number" value={activityData[i]} onChange={e => handleActivityDataChange(i, e.target.value)} className="w-14 text-xs border rounded px-1" />
-              </div>
-            ))}
-          </div>
-          {activityChartType === 'line' && <Line id="activityChart" data={userActivityData} options={{ responsive: true, plugins: { legend: { display: false }, tooltip: { enabled: true } } }} />}
-          {activityChartType === 'bar' && <Bar id="activityChart" data={userActivityData} options={{ responsive: true, plugins: { legend: { display: false }, tooltip: { enabled: true } } }} />}
-          {activityChartType === 'doughnut' && <Doughnut id="activityChart" data={userActivityData} options={{ responsive: true, plugins: { legend: { display: false }, tooltip: { enabled: true } } }} />}
         </div>
       </div>
-      {/* SOS/Emergency Button */}
-      <div className="mb-8">
-        <button onClick={handleSOS} className="px-6 py-3 bg-red-600 text-white rounded font-bold shadow-lg hover:bg-red-700 transition w-full sm:w-auto text-sm md:text-base">SOS / Emergency</button>
-      </div>
+      
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed top-2 right-2 md:top-6 md:right-6 bg-emerald-600 text-white px-6 py-3 rounded shadow-lg z-50 animate-bounce-in">
+        <div className="fixed bottom-6 right-6 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
           {toast}
         </div>
       )}
-      {/* Notifications */}
-      <div>
-        <h3 className="text-lg md:text-xl font-semibold mb-2 text-emerald-300">Notifications</h3>
-        <div className="bg-[#18182a] shadow rounded p-4 min-w-0">
-          <ul className="list-disc pl-5 space-y-1">
-            {notifications.map(n => (
-              <li key={n.id}>{n.message}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
     </div>
   );
 };
 
-export default DriverDashboard; 
+export default DriverDashboard;

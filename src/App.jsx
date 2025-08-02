@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import FleetManagerDashboard from './pages/FleetManagerDashboard';
-import DriverDashboard from './pages/DriverDashboard';
-import AdminPanel from './pages/AdminPanel';
+import PrivateRoute from './components/PrivateRoute';
+import AccessibilityFeedback from './components/AccessibilityFeedback';
+import AIChatbot from './components/AIChatbot';
+import LoadingSpinner from './components/LoadingSpinner';
 
+// Lazy load components for better performance
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Login = React.lazy(() => import('./pages/Login'));
+const Register = React.lazy(() => import('./pages/Register'));
+const FleetManagerDashboard = React.lazy(() => import('./pages/FleetManagerDashboard'));
+const DriverDashboard = React.lazy(() => import('./pages/DriverDashboard'));
+const AdminPanel = React.lazy(() => import('./pages/AdminPanel'));
 
-// Components for Home Page Layout
+// Home page components (loaded immediately)
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import Features from './components/Features';
@@ -17,7 +22,7 @@ import Testimonials from './components/Testimonials';
 import Onboarding from './components/Onboarding';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
-// import Pricing from './components/Pricing'; // You can uncomment later if needed
+
 
 const HomeLayout = () => (
   <>
@@ -28,7 +33,7 @@ const HomeLayout = () => (
     <section id="features">
       <Features />
     </section>
-    {/* <section id="pricing">
+    { /* <section id="pricing">
       <Pricing />
     </section> */}
     <section id="about">
@@ -49,15 +54,71 @@ const HomeLayout = () => (
 
 const App = () => {
   return (
-    <Routes>
+    <>
+      <AccessibilityFeedback />
+      <AIChatbot />
+      <Routes>
+      {/* Home Page Route */}
       <Route path="/" element={<HomeLayout />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/dashboard/fleet-manager" element={<FleetManagerDashboard />} />
-      <Route path="/dashboard/driver" element={<DriverDashboard />} />
-    <Route path="/dashboard/admin" element={<AdminPanel />} />
-</Routes>
+
+      {/* Auth Routes */}
+      <Route path="/login" element={
+        <Suspense fallback={<LoadingSpinner />}>
+          <Login />
+        </Suspense>
+      } />
+      <Route path="/register" element={
+        <Suspense fallback={<LoadingSpinner />}>
+          <Register />
+        </Suspense>
+      } />
+
+      {/* Protected Dashboard Routes */}
+      <Route 
+        path="/dashboard" 
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Dashboard />
+            </Suspense>
+          </PrivateRoute>
+        } 
+      />
+      
+      <Route 
+        path="/dashboard/fleet-manager" 
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingSpinner />}>
+              <FleetManagerDashboard />
+            </Suspense>
+          </PrivateRoute>
+        } 
+      />
+      
+      <Route 
+        path="/dashboard/driver" 
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingSpinner />}>
+              <DriverDashboard />
+            </Suspense>
+          </PrivateRoute>
+        } 
+      />
+      
+      <Route 
+        path="/dashboard/admin" 
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingSpinner />}>
+              <AdminPanel />
+            </Suspense>
+          </PrivateRoute>
+        } 
+      />
+    </Routes>
+    </>
   );
 };
 
