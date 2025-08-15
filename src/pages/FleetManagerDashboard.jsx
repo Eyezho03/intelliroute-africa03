@@ -190,7 +190,7 @@ const FleetManagerDashboard = () => {
   };
 
   // Chart export to PNG
-  const exportChart = (id) => {
+  const _exportChart = (id) => {
     const chart = document.getElementById(id);
     if (chart) {
       const url = chart.toDataURL('image/png');
@@ -232,12 +232,12 @@ const FleetManagerDashboard = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const enhancedExportChart = (id) => {
+  const _enhancedExportChart = (id) => {
     exportChart(id);
     showToast('Chart exported successfully!');
   };
 
-  const enhancedExportCSV = (type) => {
+  const _enhancedExportCSV = (type) => {
     exportCSV(type);
     showToast(`${type} data exported to CSV!`);
   };

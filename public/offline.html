@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - IntelliRoute Africa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .offline-container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            padding: 2rem;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #10b981;
+            font-weight: 700;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+        }
+        
+        .features-list {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .features-list h3 {
+            color: #10b981;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .features-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+        }
+        
+        .features-list li:before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.1);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+        
+        .network-status {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .status-offline {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        
+        .status-online {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+        
+        @media (max-width: 480px) {
+            .offline-container {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">
+            🚛
+        </div>
+        
+        <h1>You're Offline</h1>
+        <p>IntelliRoute Africa is currently unavailable. Don't worry - our logistics platform works offline too!</p>
+        
+        <div class="features-list">
+            <h3>Available Offline Features:</h3>
+            <ul>
+                <li>View cached analytics and reports</li>
+                <li>Access AI chatbot with stored responses</li>
+                <li>Browse previously loaded dashboards</li>
+                <li>Submit forms (synced when online)</li>
+                <li>View Kenyan route information</li>
+            </ul>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="retryConnection()">
+                🔄 Try Again
+            </button>
+            <a href="/dashboard" class="btn btn-secondary">
+                📊 View Dashboard
+            </a>
+        </div>
+        
+        <div id="networkStatus" class="network-status status-offline">
+            📡 Network connection unavailable
+        </div>
+    </div>
+
+    <script>
+        // Check network status
+        function updateNetworkStatus() {
+            const statusElement = document.getElementById('networkStatus');
+            
+            if (navigator.onLine) {
+                statusElement.className = 'network-status status-online';
+                statusElement.innerHTML = '✅ Back online! Refreshing...';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                statusElement.className = 'network-status status-offline';
+                statusElement.innerHTML = '📡 Network connection unavailable';
+            }
+        }
+        
+        // Retry connection
+        function retryConnection() {
+            updateNetworkStatus();
+            if (navigator.onLine) {
+                window.location.href = '/';
+            } else {
+                // Try to refetch anyway in case status is wrong
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 500);
+            }
+        }
+        
+        // Listen for network changes
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        
+        // Initial status check
+        updateNetworkStatus();
+        
+        // Periodic retry
+        setInterval(() => {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

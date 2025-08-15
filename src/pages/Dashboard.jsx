@@ -2,8 +2,9 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import DriverDashboard from '../pages/DriverDashboard';
-import OperationsManagerDashboard from '../pages/OperationManagerDashboard';
-import FleetManagerDashboard from '../pages/FleetManagerDashboard';
+import ManufacturerDashboard from '../pages/ManufacturerDashboard';
+import WholesalerDashboard from '../pages/WholesalerDashboard';
+import RetailerDashboard from '../pages/RetailerDashboard';
 import AdminDashboard from '../pages/AdminPanel';
 
 const Dashboard = () => {
@@ -16,8 +17,9 @@ const Dashboard = () => {
     const lowerRole = role.toLowerCase();
     if (lowerRole.includes('admin')) return 'admin';
     if (lowerRole.includes('driver')) return 'driver';
-    if (lowerRole.includes('fleet') || lowerRole.includes('vehicle')) return 'fleet_manager';
-    if (lowerRole.includes('operation') || lowerRole.includes('ops')) return 'operations_manager';
+    if (lowerRole.includes('manufacturer') || lowerRole.includes('production')) return 'manufacturer';
+    if (lowerRole.includes('wholesaler') || lowerRole.includes('distribution')) return 'wholesaler';
+    if (lowerRole.includes('retailer') || lowerRole.includes('retail') || lowerRole.includes('store')) return 'retailer';
     return role;
   };
 
@@ -88,10 +90,12 @@ const Dashboard = () => {
   switch (role) {
     case 'driver':
       return <DriverDashboard user={user} />;
-    case 'operations_manager':
-      return <OperationsManagerDashboard user={user} />;
-    case 'fleet_manager':
-      return <FleetManagerDashboard user={user} />;
+    case 'manufacturer':
+      return <ManufacturerDashboard user={user} />;
+    case 'wholesaler':
+      return <WholesalerDashboard user={user} />;
+    case 'retailer':
+      return <RetailerDashboard user={user} />;
     case 'admin':
       return <AdminDashboard user={user} />;
     default:

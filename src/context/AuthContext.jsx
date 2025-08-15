@@ -1,5 +1,6 @@
 // AuthContext.jsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { apiService } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -33,8 +34,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Refresh authentication
-  const refreshAuth = async () => {
+  // Refresh authentication (useCallback to prevent re-renders)
+  const refreshAuth = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -47,37 +48,37 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Auth verification failed:', err);
       localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
       setAuth({ isAuthenticated: false, user: null, loading: false, error: err.message });
     }
-  };
+  }, []);
 
   // Login function
   const login = async (email, password) => {
     try {
       setAuth(prev => ({ ...prev, loading: true, error: null }));
       
-      // In a real app, this would call your authentication API
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          const user = users.find(u => u.email === email && u.password === password);
-          
-          if (user) {
-            const token = `token-${Date.now()}-${Math.random()}`;
-            localStorage.setItem('token', token);
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            setAuth({ isAuthenticated: true, user, loading: false, error: null });
-            resolve(user);
-          } else {
-            const error = new Error('Invalid email or password. Please check your credentials.');
-            setAuth({ isAuthenticated: false, user: null, loading: false, error: error.message });
-            reject(error);
-          }
-        }, 1000);
-      });
+      const response = await apiService.login({ email, password });
+      
+      if (response.user && response.token) {
+        setAuth({ 
+          isAuthenticated: true, 
+          user: response.user, 
+          loading: false, 
+          error: null 
+        });
+        return response.user;
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (err) {
       const errorMessage = err.message || 'Login failed. Please try again.';
-      setAuth({ isAuthenticated: false, user: null, loading: false, error: errorMessage });
+      setAuth({ 
+        isAuthenticated: false, 
+        user: null, 
+        loading: false, 
+        error: errorMessage 
+      });
       throw err;
     }
   };
@@ -87,58 +88,67 @@ export const AuthProvider = ({ children }) => {
     try {
       setAuth(prev => ({ ...prev, loading: true, error: null }));
       
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          
-          // Check if user already exists
-          const existingUser = users.find(u => u.email === userData.email);
-          if (existingUser) {
-            const error = new Error('User with this email already exists');
-            setAuth({ isAuthenticated: false, user: null, loading: false, error: error.message });
-            reject(error);
-            return;
-          }
-          
-          // Create new user
-          const newUser = {
-            id: Date.now(),
-            ...userData,
-            createdAt: new Date().toISOString()
-          };
-          
-          users.push(newUser);
-          localStorage.setItem('users', JSON.stringify(users));
-          
-          // Auto login after registration
-          const token = `token-${Date.now()}-${Math.random()}`;
-          localStorage.setItem('token', token);
-          localStorage.setItem('currentUser', JSON.stringify(newUser));
-          setAuth({ isAuthenticated: true, user: newUser, loading: false, error: null });
-          resolve(newUser);
-        }, 1000);
-      });
+      const response = await apiService.register(userData);
+      
+      if (response.user && response.token) {
+        setAuth({ 
+          isAuthenticated: true, 
+          user: response.user, 
+          loading: false, 
+          error: null 
+        });
+        return response.user;
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (err) {
       const errorMessage = err.message || 'Registration failed. Please try again.';
-      setAuth({ isAuthenticated: false, user: null, loading: false, error: errorMessage });
+      setAuth({ 
+        isAuthenticated: false, 
+        user: null, 
+        loading: false, 
+        error: errorMessage 
+      });
       throw err;
     }
   };
 
   // Logout function
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
-    setAuth({ isAuthenticated: false, user: null, loading: false, error: null });
+  const logout = async () => {
+    try {
+      await apiService.logout();
+    } catch (error) {
+      console.warn('Logout API call failed:', error.message);
+    } finally {
+      setAuth({ isAuthenticated: false, user: null, loading: false, error: null });
+    }
+  };
+  
+  // Update profile function
+  const updateProfile = async (userData) => {
+    try {
+      const updatedUser = await apiService.updateProfile(userData);
+      setAuth(prev => ({ ...prev, user: updatedUser }));
+      return updatedUser;
+    } catch (err) {
+      throw err;
+    }
   };
 
   // Initialize authentication
   useEffect(() => {
     refreshAuth();
-  }, []);
+  }, [refreshAuth]);
 
   return (
-    <AuthContext.Provider value={{ ...auth, login, logout, register, refreshAuth }}>
+    <AuthContext.Provider value={{ 
+      ...auth, 
+      login, 
+      logout, 
+      register, 
+      refreshAuth,
+      updateProfile 
+    }}>
       {children}
     </AuthContext.Provider>
   );

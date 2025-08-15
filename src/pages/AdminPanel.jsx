@@ -218,7 +218,7 @@ const AdminPanel = () => {
   };
 
   // Export to PNG
-  const exportChart = (id) => {
+  const _exportChart = (id) => {
     const canvas = document.getElementById(id);
     if (canvas) {
       const link = document.createElement('a');
@@ -229,7 +229,7 @@ const AdminPanel = () => {
   };
 
   // Enhanced export with better quality
-  const exportChartHD = (id) => {
+  const _exportChartHD = (id) => {
     const canvas = document.getElementById(id);
     if (canvas) {
       const link = document.createElement('a');

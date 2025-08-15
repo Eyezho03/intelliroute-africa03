@@ -40,7 +40,7 @@ const OperationManagerDashboard = () => {
   ]);
   
   const [toast, setToast] = useState(null);
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   // Sample chart data
   const performanceData = {

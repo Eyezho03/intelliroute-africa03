@@ -1,6 +1,7 @@
 // Login.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,6 +11,8 @@ const Login = () => {
   const [showDebug, setShowDebug] = useState(false);
   const [users, setUsers] = useState([]);
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Load users from localStorage for debugging
   useEffect(() => {
@@ -27,9 +30,42 @@ const Login = () => {
       const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
       console.log('Stored users:', storedUsers);
       
-      await login(email, password);
-      console.log('Login successful, redirecting to dashboard');
-      window.location.href = '/dashboard';
+      const user = await login(email, password);
+      console.log('Login successful, user:', user);
+      
+      // Role-based navigation
+      let redirectPath;
+      const from = location.state?.from?.pathname;
+      
+      if (from) {
+        redirectPath = from;
+      } else {
+        // Default redirects based on user role
+        switch (user.role) {
+          case 'admin':
+            redirectPath = '/dashboard/admin';
+            break;
+          case 'driver':
+            redirectPath = '/dashboard/driver';
+            break;
+          case 'fleet-manager':
+            redirectPath = '/dashboard/fleet-manager';
+            break;
+          case 'producer':
+            redirectPath = '/dashboard/manufacturer';
+            break;
+          case 'wholesaler':
+            redirectPath = '/dashboard/wholesaler';
+            break;
+          case 'retailer':
+            redirectPath = '/dashboard/retailer';
+            break;
+          default:
+            redirectPath = '/dashboard';
+        }
+      }
+      
+      navigate(redirectPath, { replace: true });
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Login failed. Please try again.');
@@ -46,26 +82,93 @@ const Login = () => {
     alert('Storage cleared!');
   };
 
-  const createDemoUser = () => {
-    const demoUser = {
-      id: Date.now(),
-      fullName: 'Demo User',
-      email: 'demo@intelliroute.com',
-      password: 'demo123',
-      role: 'admin',
-      createdAt: new Date().toISOString()
-    };
+  const createDemoUsers = () => {
+    const demoUsers = [
+      {
+        id: Date.now() + 1,
+        fullName: 'Admin User',
+        email: 'admin@intelliroute.com',
+        password: 'admin123',
+        role: 'admin',
+        company: 'IntelliRoute Africa',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: Date.now() + 2,
+        fullName: 'John Driver',
+        email: 'driver@intelliroute.com',
+        password: 'driver123',
+        role: 'driver',
+        company: 'IntelliRoute Logistics',
+        vehicleId: 'KBZ-123A',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: Date.now() + 3,
+        fullName: 'Fleet Manager',
+        email: 'fleet@intelliroute.com',
+        password: 'fleet123',
+        role: 'fleet-manager',
+        company: 'IntelliRoute Fleet Services',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: Date.now() + 4,
+        fullName: 'Producer Mike',
+        email: 'producer@intelliroute.com',
+        password: 'producer123',
+        role: 'producer',
+        company: 'Nakuru Grains Ltd',
+        businessType: 'Agricultural Producer',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: Date.now() + 5,
+        fullName: 'Wholesaler Sarah',
+        email: 'wholesaler@intelliroute.com',
+        password: 'wholesale123',
+        role: 'wholesaler',
+        company: 'East Africa Distributors',
+        businessType: 'Wholesale Distribution',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: Date.now() + 6,
+        fullName: 'Retailer Jane',
+        email: 'retailer@intelliroute.com',
+        password: 'retail123',
+        role: 'retailer',
+        company: 'Nairobi Fresh Markets',
+        businessType: 'Retail Store',
+        createdAt: new Date().toISOString()
+      }
+    ];
     
     const currentUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = [...currentUsers, demoUser];
+    // Filter out existing demo users to avoid duplicates
+    const nonDemoUsers = currentUsers.filter(u => !u.email.includes('@intelliroute.com'));
+    const updatedUsers = [...nonDemoUsers, ...demoUsers];
+    
     localStorage.setItem('users', JSON.stringify(updatedUsers));
     setUsers(updatedUsers);
     
-    // Auto-fill the form
-    setEmail(demoUser.email);
-    setPassword(demoUser.password);
+    alert(`✅ Created ${demoUsers.length} demo users!\n\nAdmin: admin@intelliroute.com / admin123\nDriver: driver@intelliroute.com / driver123\nFleet Manager: fleet@intelliroute.com / fleet123\nProducer: producer@intelliroute.com / producer123\nWholesaler: wholesaler@intelliroute.com / wholesale123\nRetailer: retailer@intelliroute.com / retail123`);
+  };
+  
+  const fillDemoCredentials = (role) => {
+    const credentials = {
+      admin: { email: 'admin@intelliroute.com', password: 'admin123' },
+      driver: { email: 'driver@intelliroute.com', password: 'driver123' },
+      'fleet-manager': { email: 'fleet@intelliroute.com', password: 'fleet123' },
+      producer: { email: 'producer@intelliroute.com', password: 'producer123' },
+      wholesaler: { email: 'wholesaler@intelliroute.com', password: 'wholesale123' },
+      retailer: { email: 'retailer@intelliroute.com', password: 'retail123' }
+    };
     
-    alert('Demo user created! Email: demo@intelliroute.com, Password: demo123');
+    if (credentials[role]) {
+      setEmail(credentials[role].email);
+      setPassword(credentials[role].password);
+    }
   };
 
   return (
@@ -196,19 +299,63 @@ const Login = () => {
                   </ul>
                 )}
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={createDemoUser}
-                  className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
-                >
-                  Create Demo User
-                </button>
-                <button
-                  onClick={clearStorage}
-                  className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
-                >
-                  Clear Storage
-                </button>
+              <div className="space-y-2">
+                <div className="flex gap-1 flex-wrap">
+                  <button
+                    onClick={createDemoUsers}
+                    className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+                  >
+                    Create All Demo Users
+                  </button>
+                  <button
+                    onClick={clearStorage}
+                    className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                  >
+                    Clear Storage
+                  </button>
+                </div>
+                
+                <div className="border-t pt-2">
+                  <p className="text-gray-600 mb-1 font-medium">Quick Login:</p>
+                  <div className="grid grid-cols-2 gap-1">
+                    <button
+                      onClick={() => fillDemoCredentials('admin')}
+                      className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                    >
+                      Admin
+                    </button>
+                    <button
+                      onClick={() => fillDemoCredentials('driver')}
+                      className="px-2 py-1 bg-purple-500 text-white text-xs rounded hover:bg-purple-600"
+                    >
+                      Driver
+                    </button>
+                    <button
+                      onClick={() => fillDemoCredentials('fleet-manager')}
+                      className="px-2 py-1 bg-indigo-500 text-white text-xs rounded hover:bg-indigo-600"
+                    >
+                      Fleet
+                    </button>
+                    <button
+                      onClick={() => fillDemoCredentials('producer')}
+                      className="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+                    >
+                      Producer
+                    </button>
+                    <button
+                      onClick={() => fillDemoCredentials('wholesaler')}
+                      className="px-2 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600"
+                    >
+                      Wholesaler
+                    </button>
+                    <button
+                      onClick={() => fillDemoCredentials('retailer')}
+                      className="px-2 py-1 bg-pink-500 text-white text-xs rounded hover:bg-pink-600"
+                    >
+                      Retailer
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}

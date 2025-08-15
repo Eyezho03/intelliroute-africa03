@@ -8,17 +8,19 @@
     @apply transition ease-out duration-300 transform translate-y-0 opacity-100;
     animation: slideDown 0.3s ease forwards;
   }
+
   @keyframes slideDown {
     from {
       opacity: 0;
       transform: translateY(-20%);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
-  .min-w-0 {
-    min-width: 0;
-  }
+}
+html {
+  scroll-behavior: smooth;
 }

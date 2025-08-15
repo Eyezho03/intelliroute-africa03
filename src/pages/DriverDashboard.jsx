@@ -62,21 +62,36 @@ const africanNotifications = [
 const africanRoutes = [
   { 
     id: 1, 
-    name: 'Mombasa to Kampala', 
+    name: 'Manufacturer to Wholesaler - Nairobi', 
     status: 'In Progress',
-    distance: '1,100 km',
-    estimatedTime: '2 days',
-    borderCrossings: ['Namanga'],
-    progress: 65
+    distance: '250 km',
+    estimatedTime: '6 hours',
+    borderCrossings: [],
+    progress: 65,
+    orderType: 'Manufacturer → Wholesaler',
+    cargo: 'Food Products'
   },
   { 
     id: 2, 
-    name: 'Durban to Lusaka', 
+    name: 'Wholesaler to Retailer - Lagos', 
     status: 'Pending',
-    distance: '1,800 km',
-    estimatedTime: '3 days',
-    borderCrossings: ['Beitbridge'],
-    progress: 0
+    distance: '80 km',
+    estimatedTime: '3 hours',
+    borderCrossings: [],
+    progress: 0,
+    orderType: 'Wholesaler → Retailer',
+    cargo: 'Consumer Goods'
+  },
+  { 
+    id: 3, 
+    name: 'Cross-border Delivery - Kampala', 
+    status: 'In Progress',
+    distance: '850 km',
+    estimatedTime: '2 days',
+    borderCrossings: ['Malaba'],
+    progress: 30,
+    orderType: 'Manufacturer → Wholesaler',
+    cargo: 'Bulk Commodities'
   },
 ];
 
@@ -87,7 +102,7 @@ const africanFuelPrices = [
   { country: 'Rwanda', diesel: 152.30, petrol: 147.80 },
 ];
 
-const DriverDashboard = () => {
+const DriverDashboard = ({ user }) => {
   const [routes, setRoutes] = useState(africanRoutes);
   const [checklist, setChecklist] = useState(africanChecklist);
   const [notifications, setNotifications] = useState(africanNotifications);
@@ -220,7 +235,7 @@ const DriverDashboard = () => {
   };
 
   // Export chart data
-  const exportChart = (chartId) => {
+  const _exportChart = (chartId) => {
     const canvas = document.getElementById(chartId);
     if (canvas) {
       const link = document.createElement('a');
@@ -236,8 +251,8 @@ const DriverDashboard = () => {
     showToast('Contacting support team...');
   };
 
-  const completedTasks = checklist.filter(task => task.done).length;
-  const totalTasks = checklist.length;
+  const _completedTasks = checklist.filter(task => task.done).length;
+  const _totalTasks = checklist.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 text-gray-200 p-4 md:p-6">
@@ -251,8 +266,9 @@ const DriverDashboard = () => {
           </h1>
           <p className="text-gray-400 mt-2 flex items-center gap-2">
             <Navigation size={16} />
-            IntelliRoute Africa - Optimized logistics for East African corridors
+            Multi-tier supply chain deliveries for manufacturers, wholesalers and retailers
           </p>
+          <p className="text-sm text-gray-500">Welcome back, {user?.name || user?.fullName}</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -286,14 +302,14 @@ const DriverDashboard = () => {
           <div className="bg-[#18182a] rounded-xl shadow-lg p-5">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
               <h2 className="text-xl font-bold text-emerald-300 mb-2 sm:mb-0">
-                Active Transport Routes
+                Assigned Supply Chain Deliveries
               </h2>
               <div className="flex gap-2 w-full sm:w-auto">
                 <input
                   type="text"
                   value={newRoute}
                   onChange={e => setNewRoute(e.target.value)}
-                  placeholder="Add new route (e.g. Nairobi to Kigali)"
+                  placeholder="Add delivery route (e.g. Manufacturer to Retailer)"
                   className="border-b-2 border-emerald-300 focus:outline-none px-3 py-2 bg-[#222235] rounded w-full"
                 />
                 <button 
@@ -324,6 +340,12 @@ const DriverDashboard = () => {
                             : 'bg-blue-500 text-blue-900'
                         }`}>
                           {route.status}
+                        </span>
+                        <span className="bg-emerald-700 px-2 py-1 rounded text-sm">
+                          🚚 {route.orderType}
+                        </span>
+                        <span className="bg-purple-700 px-2 py-1 rounded text-sm">
+                          📦 {route.cargo}
                         </span>
                       </div>
                       

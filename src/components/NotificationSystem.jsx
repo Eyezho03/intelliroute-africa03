@@ -1,41 +1,176 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, CheckCircle, AlertTriangle, Info, TrendingUp } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const NotificationSystem = () => {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
 
-  // Mock real-time notifications
-  useEffect(() => {
-    const mockNotifications = [
+  // Role-specific notification generator
+  const generateRoleSpecificNotifications = (userRole) => {
+    const baseNotifications = {
+      'Supply Chain Manager': [
+        {
+          id: 1,
+          type: 'success',
+          title: 'Supply Chain Optimized',
+          message: 'Inventory levels optimized across all warehouses - 12% cost reduction',
+          timestamp: new Date(),
+          read: false
+        },
+        {
+          id: 2,
+          type: 'warning',
+          title: 'Stock Level Alert',
+          message: 'Low inventory detected for Product SKU-2024-001 in Lagos warehouse',
+          timestamp: new Date(Date.now() - 1000 * 60 * 30),
+          read: false
+        },
+        {
+          id: 3,
+          type: 'info',
+          title: 'Supplier Update',
+          message: 'New preferred supplier added for West African region',
+          timestamp: new Date(Date.now() - 1000 * 60 * 60),
+          read: true
+        }
+      ],
+      'Fleet Manager': [
+        {
+          id: 1,
+          type: 'warning',
+          title: 'Vehicle Maintenance Due',
+          message: 'Vehicle KTN-001 requires scheduled maintenance in 2 days',
+          timestamp: new Date(),
+          read: false
+        },
+        {
+          id: 2,
+          type: 'success',
+          title: 'Fuel Efficiency Improved',
+          message: 'Fleet average fuel efficiency increased by 8% this month',
+          timestamp: new Date(Date.now() - 1000 * 60 * 45),
+          read: false
+        },
+        {
+          id: 3,
+          type: 'info',
+          title: 'Driver Performance Update',
+          message: 'Monthly driver performance reports are now available',
+          timestamp: new Date(Date.now() - 1000 * 60 * 90),
+          read: true
+        }
+      ],
+      'Operations Manager': [
+        {
+          id: 1,
+          type: 'success',
+          title: 'Route Optimized',
+          message: 'Lagos to Accra route optimized - 15% time reduction achieved',
+          timestamp: new Date(),
+          read: false
+        },
+        {
+          id: 2,
+          type: 'warning',
+          title: 'Delivery Delay Alert',
+          message: 'Shipment SH-2024-003 delayed due to traffic congestion',
+          timestamp: new Date(Date.now() - 1000 * 60 * 20),
+          read: false
+        },
+        {
+          id: 3,
+          type: 'info',
+          title: 'Performance Metrics',
+          message: 'Weekly operational efficiency report is ready for review',
+          timestamp: new Date(Date.now() - 1000 * 60 * 120),
+          read: true
+        }
+      ],
+      'Driver': [
+        {
+          id: 1,
+          type: 'info',
+          title: 'New Route Assignment',
+          message: 'You have been assigned route RT-2024-156 for tomorrow',
+          timestamp: new Date(),
+          read: false
+        },
+        {
+          id: 2,
+          type: 'warning',
+          title: 'Weather Alert',
+          message: 'Heavy rain expected on your route - drive safely',
+          timestamp: new Date(Date.now() - 1000 * 60 * 15),
+          read: false
+        },
+        {
+          id: 3,
+          type: 'success',
+          title: 'Performance Bonus',
+          message: 'Congratulations! You earned a safety bonus this month',
+          timestamp: new Date(Date.now() - 1000 * 60 * 60),
+          read: true
+        }
+      ],
+      'Admin': [
+        {
+          id: 1,
+          type: 'warning',
+          title: 'System Maintenance',
+          message: 'Scheduled system maintenance planned for this weekend',
+          timestamp: new Date(),
+          read: false
+        },
+        {
+          id: 2,
+          type: 'info',
+          title: 'New User Registration',
+          message: '5 new users registered in the past 24 hours',
+          timestamp: new Date(Date.now() - 1000 * 60 * 60),
+          read: false
+        },
+        {
+          id: 3,
+          type: 'success',
+          title: 'Backup Completed',
+          message: 'Daily system backup completed successfully',
+          timestamp: new Date(Date.now() - 1000 * 60 * 120),
+          read: true
+        }
+      ]
+    };
+
+    // Default notifications for unknown roles
+    const defaultNotifications = [
       {
         id: 1,
-        type: 'success',
-        title: 'Route Optimized',
-        message: 'Lagos to Accra route has been optimized - 15% time reduction',
+        type: 'info',
+        title: 'Welcome to IntelliRoute',
+        message: 'Explore our AI-powered logistics platform',
         timestamp: new Date(),
         read: false
       },
       {
         id: 2,
-        type: 'warning',
-        title: 'Vehicle Maintenance Due',
-        message: 'Vehicle KTN-001 requires maintenance in 2 days',
-        timestamp: new Date(Date.now() - 1000 * 60 * 30),
-        read: false
-      },
-      {
-        id: 3,
-        type: 'info',
-        title: 'AI Suggestion Available',
-        message: 'New delivery route suggestions based on traffic analysis',
+        type: 'success',
+        title: 'Platform Update',
+        message: 'New features have been added to improve your experience',
         timestamp: new Date(Date.now() - 1000 * 60 * 60),
         read: true
       }
     ];
 
-    setNotifications(mockNotifications);
+    return baseNotifications[userRole] || defaultNotifications;
+  };
+
+  // Mock real-time notifications
+  useEffect(() => {
+    const userRole = user?.role || 'Guest';
+    const roleSpecificNotifications = generateRoleSpecificNotifications(userRole);
+    setNotifications(roleSpecificNotifications);
 
     // Simulate real-time updates
     const interval = setInterval(() => {
@@ -52,7 +187,7 @@ const NotificationSystem = () => {
     }, 30000); // New notification every 30 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   const getIcon = (type) => {
     switch (type) {
