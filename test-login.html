@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            background: #e8f4fd;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #2196F3;
+            border-radius: 5px;
+        }
+        .credentials {
+            background: #f0f8ff;
+            padding: 15px;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚛 Driver Dashboard Login Guide</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong> Make sure your React development server is running first!
+        </div>
+
+        <h2>Step-by-Step Login Process:</h2>
+        
+        <div class="step">
+            <strong>Step 1:</strong> Start your React development server
+            <br><code>cd "Frontend" && npm start</code>
+        </div>
+
+        <div class="step">
+            <strong>Step 2:</strong> Open your browser and go to:
+            <br><a href="http://localhost:3000/login" target="_blank">http://localhost:3000/login</a>
+        </div>
+
+        <div class="step">
+            <strong>Step 3:</strong> Scroll down and click "Show Debug Info"
+        </div>
+
+        <div class="step">
+            <strong>Step 4:</strong> Click "Create All Demo Users" (green button)
+        </div>
+
+        <div class="step">
+            <strong>Step 5:</strong> Click the "Driver" button to auto-fill credentials
+        </div>
+
+        <div class="credentials">
+            <h3>🔑 Driver Login Credentials:</h3>
+            <strong>Email:</strong> driver@intelliroute.com<br>
+            <strong>Password:</strong> driver123
+        </div>
+
+        <div class="step">
+            <strong>Step 6:</strong> Click "Sign in"
+        </div>
+
+        <h2>🔧 Troubleshooting:</h2>
+        
+        <div class="step">
+            <strong>If login fails:</strong>
+            <ol>
+                <li>Clear browser storage (F12 → Application → Storage → Clear site data)</li>
+                <li>Refresh the page</li>
+                <li>Recreate demo users</li>
+                <li>Try again</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <strong>Alternative method:</strong> Manually type the credentials above into the login form
+        </div>
+
+        <h2>🎯 What Should Happen:</h2>
+        <ul>
+            <li>✅ You should be redirected to the driver dashboard</li>
+            <li>✅ You'll see navigation tabs: Dashboard, Deliveries, Reports, Settings</li>
+            <li>✅ A blue "Home" button should be visible in the top right</li>
+            <li>✅ The page should show route management and delivery tracking</li>
+        </ul>
+
+        <div class="step">
+            <button class="button" onclick="openLogin()">🚀 Open Login Page</button>
+            <button class="button" onclick="copyCredentials()">📋 Copy Driver Credentials</button>
+        </div>
+
+        <div id="status" style="margin-top: 20px; padding: 10px; display: none;"></div>
+    </div>
+
+    <script>
+        function openLogin() {
+            window.open('http://localhost:3000/login', '_blank');
+        }
+
+        function copyCredentials() {
+            const credentials = 'Email: driver@intelliroute.com\nPassword: driver123';
+            navigator.clipboard.writeText(credentials).then(() => {
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                status.style.background = '#d4edda';
+                status.style.color = '#155724';
+                status.innerHTML = '✅ Credentials copied to clipboard!';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            });
+        }
+
+        // Check if localhost is running
+        fetch('http://localhost:3000')
+            .then(() => {
+                document.querySelector('.warning').style.display = 'none';
+            })
+            .catch(() => {
+                document.querySelector('.warning').innerHTML = 
+                    '<strong>⚠️ Server Not Running:</strong> Please start your React server first with: <code>npm start</code>';
+            });
+    </script>
+</body>
+</html>

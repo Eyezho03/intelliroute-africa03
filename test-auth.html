@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #007bff; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .success { border-left-color: #28a745; background: #d4edda; }
+    </style>
+</head>
+<body>
+    <h1>IntelliRoute Africa - Authentication Test</h1>
+    
+    <div class="section">
+        <h2>Current Status</h2>
+        <div id="status" class="result">Loading...</div>
+        <button onclick="checkStatus()">Refresh Status</button>
+    </div>
+
+    <div class="section">
+        <h2>Create Demo User</h2>
+        <button onclick="createDemoUser()">Create Demo User</button>
+        <div id="createResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="section">
+        <h2>Test Login</h2>
+        <input type="email" id="email" placeholder="Email" value="demo@intelliroute.com" style="padding: 8px; margin: 5px;">
+        <input type="password" id="password" placeholder="Password" value="demo123" style="padding: 8px; margin: 5px;">
+        <button onclick="testLogin()">Test Login</button>
+        <div id="loginResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="section">
+        <h2>Registered Users</h2>
+        <button onclick="showUsers()">Show All Users</button>
+        <div id="usersList" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="section">
+        <h2>Clear Storage</h2>
+        <button onclick="clearStorage()" style="background: #dc3545;">Clear All Data</button>
+    </div>
+
+    <script>
+        function checkStatus() {
+            const token = localStorage.getItem('token');
+            const currentUser = localStorage.getItem('currentUser');
+            const users = localStorage.getItem('users');
+            
+            let status = '';
+            if (token && currentUser) {
+                const user = JSON.parse(currentUser);
+                status = `✅ Logged in as: ${user.fullName} (${user.email}) - Role: ${user.role}`;
+                document.getElementById('status').className = 'result success';
+            } else {
+                status = '❌ Not logged in';
+                document.getElementById('status').className = 'result error';
+            }
+            
+            status += `<br><br>📊 Statistics:<br>`;
+            status += `• Token: ${token ? '✅ Present' : '❌ Missing'}<br>`;
+            status += `• Current User: ${currentUser ? '✅ Present' : '❌ Missing'}<br>`;
+            status += `• Registered Users: ${users ? JSON.parse(users).length : 0}<br>`;
+            
+            document.getElementById('status').innerHTML = status;
+        }
+
+        function createDemoUser() {
+            const demoUser = {
+                id: Date.now(),
+                fullName: 'Demo User',
+                email: 'demo@intelliroute.com',
+                password: 'demo123',
+                role: 'admin',
+                createdAt: new Date().toISOString()
+            };
+            
+            const currentUsers = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Check if demo user already exists
+            const existingUser = currentUsers.find(u => u.email === demoUser.email);
+            if (existingUser) {
+                document.getElementById('createResult').innerHTML = '⚠️ Demo user already exists!';
+                document.getElementById('createResult').className = 'result error';
+            } else {
+                currentUsers.push(demoUser);
+                localStorage.setItem('users', JSON.stringify(currentUsers));
+                document.getElementById('createResult').innerHTML = '✅ Demo user created successfully!<br>Email: demo@intelliroute.com<br>Password: demo123';
+                document.getElementById('createResult').className = 'result success';
+            }
+            
+            document.getElementById('createResult').style.display = 'block';
+            checkStatus();
+        }
+
+        function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                const token = `token-${Date.now()}-${Math.random()}`;
+                localStorage.setItem('token', token);
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                document.getElementById('loginResult').innerHTML = `✅ Login successful!<br>Welcome ${user.fullName}`;
+                document.getElementById('loginResult').className = 'result success';
+            } else {
+                document.getElementById('loginResult').innerHTML = '❌ Invalid email or password';
+                document.getElementById('loginResult').className = 'result error';
+            }
+            
+            document.getElementById('loginResult').style.display = 'block';
+            checkStatus();
+        }
+
+        function showUsers() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            if (users.length === 0) {
+                document.getElementById('usersList').innerHTML = '📝 No users registered yet';
+                document.getElementById('usersList').className = 'result';
+            } else {
+                let usersList = `📋 Registered Users (${users.length}):<br><br>`;
+                users.forEach((user, index) => {
+                    usersList += `${index + 1}. <strong>${user.fullName}</strong><br>`;
+                    usersList += `   📧 ${user.email}<br>`;
+                    usersList += `   👤 ${user.role}<br>`;
+                    usersList += `   📅 ${new Date(user.createdAt).toLocaleString()}<br><br>`;
+                });
+                document.getElementById('usersList').innerHTML = usersList;
+                document.getElementById('usersList').className = 'result success';
+            }
+            
+            document.getElementById('usersList').style.display = 'block';
+        }
+
+        function clearStorage() {
+            if (confirm('Are you sure you want to clear all data? This will log you out and remove all registered users.')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('users');
+                alert('✅ Storage cleared successfully!');
+                checkStatus();
+                document.getElementById('usersList').style.display = 'none';
+                document.getElementById('loginResult').style.display = 'none';
+                document.getElementById('createResult').style.display = 'none';
+            }
+        }
+
+        // Initialize
+        checkStatus();
+    </script>
+</body>
+</html>

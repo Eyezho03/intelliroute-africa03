@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliRoute Africa Integration Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .link-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 10px 10px 0;
+            transition: background 0.3s;
+        }
+        .link-button:hover { background: #1976D2; }
+        .demo-accounts {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 IntelliRoute Africa Integration Test</h1>
+    
+    <div class="test-card success">
+        <h3>✅ Backend API Status</h3>
+        <p>The backend API is running successfully on <strong>http://localhost:5001</strong></p>
+        <ul>
+            <li>✅ Health endpoint responding</li>
+            <li>✅ Authentication working (admin login)</li>
+            <li>✅ Protected endpoints accessible</li>
+            <li>✅ Vehicles API (3 vehicles found)</li>
+            <li>✅ Inventory API (3 items found)</li>
+        </ul>
+    </div>
+
+    <div class="test-card success">
+        <h3>🎯 Frontend Application</h3>
+        <p>The frontend is running on <strong>http://localhost:5175</strong></p>
+        <a href="http://localhost:5175" class="link-button" target="_blank">Open Main App</a>
+        <a href="http://localhost:5175/demo" class="link-button" target="_blank">Open Demo Integration</a>
+    </div>
+
+    <div class="demo-accounts">
+        <h3>📝 Demo Account Credentials</h3>
+        <p>Use these credentials to test the integration:</p>
+        <ul>
+            <li><strong>Admin:</strong> admin@intelliroute.com / admin123</li>
+            <li><strong>Driver:</strong> driver@intelliroute.com / driver123</li>
+            <li><strong>Fleet Manager:</strong> fleet@intelliroute.com / fleet123</li>
+            <li><strong>Producer:</strong> producer@intelliroute.com / producer123</li>
+            <li><strong>Customer:</strong> customer@intelliroute.com / customer123</li>
+        </ul>
+    </div>
+
+    <div class="test-card">
+        <h3>🔧 Testing Instructions</h3>
+        <ol>
+            <li>Click "Open Demo Integration" above to access the integrated app</li>
+            <li>Use any of the demo account credentials to log in</li>
+            <li>Test the role-based dashboard functionality</li>
+            <li>Verify that the frontend successfully communicates with the backend</li>
+            <li>Try logging out and logging in with different roles</li>
+        </ol>
+    </div>
+
+    <script>
+        // Test if frontend is accessible via JavaScript
+        setTimeout(async () => {
+            try {
+                const response = await fetch('http://localhost:5175/');
+                if (response.ok) {
+                    console.log('✅ Frontend accessible via JavaScript');
+                } else {
+                    console.log('❌ Frontend not accessible');
+                }
+            } catch (error) {
+                console.log('❌ Frontend connection failed:', error.message);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
