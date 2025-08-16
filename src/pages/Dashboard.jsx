@@ -16,10 +16,11 @@ const Dashboard = () => {
     
     const lowerRole = role.toLowerCase();
     if (lowerRole.includes('admin')) return 'admin';
-    if (lowerRole.includes('driver')) return 'driver';
-    if (lowerRole.includes('manufacturer') || lowerRole.includes('production')) return 'manufacturer';
-    if (lowerRole.includes('wholesaler') || lowerRole.includes('distribution')) return 'wholesaler';
-    if (lowerRole.includes('retailer') || lowerRole.includes('retail') || lowerRole.includes('store')) return 'retailer';
+    if (lowerRole === 'driver' || lowerRole.includes('driver')) return 'driver';
+    if (lowerRole === 'producer' || lowerRole.includes('manufacturer') || lowerRole.includes('production')) return 'manufacturer';
+    if (lowerRole === 'wholesaler' || lowerRole.includes('wholesaler') || lowerRole.includes('distribution')) return 'wholesaler';
+    if (lowerRole === 'retailer' || lowerRole.includes('retailer') || lowerRole.includes('retail') || lowerRole.includes('store')) return 'retailer';
+    if (lowerRole === 'fleet-manager' || lowerRole.includes('fleet')) return 'driver'; // Fleet managers use driver dashboard
     return role;
   };
 

@@ -3,7 +3,7 @@
 
 import { ErrorHandler, RetryHandler, ERROR_TYPES, AppError } from '../utils/errorHandler';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
 
 class APIService {
   constructor() {
@@ -127,7 +127,9 @@ class APIService {
       return response;
     } catch (error) {
       // Fallback to localStorage for development
-      console.warn('API login failed, falling back to localStorage auth:', error.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('API login failed, falling back to localStorage auth:', error.message);
+      }
       return this.fallbackLogin(credentials);
     }
   }
@@ -146,7 +148,9 @@ class APIService {
       
       return response;
     } catch (error) {
-      console.warn('API register failed, falling back to localStorage auth:', error.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('API register failed, falling back to localStorage auth:', error.message);
+      }
       return this.fallbackRegister(userData);
     }
   }
@@ -155,7 +159,9 @@ class APIService {
     try {
       await this.request('/auth/logout', { method: 'POST' });
     } catch (error) {
-      console.warn('API logout failed:', error.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('API logout failed:', error.message);
+      }
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('currentUser');

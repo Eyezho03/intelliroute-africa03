@@ -1,15 +1,10 @@
 {
   "version": 2,
   "name": "intelliroute-africa",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "framework": "vite",
   "routes": [
     {
       "src": "/assets/(.*)",
@@ -22,9 +17,15 @@
       "dest": "/index.html"
     }
   ],
-  "functions": {
-    "app/api/**.js": {
-      "runtime": "nodejs18.x"
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
     }
-  }
+  ]
 }

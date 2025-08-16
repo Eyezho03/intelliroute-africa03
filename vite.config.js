@@ -9,16 +9,29 @@ export default defineConfig({
     tailwindcss()
   ],
   build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
     rollupOptions: {
-      external: [
-
-      ],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          charts: ['chart.js', 'react-chartjs-2'],
+          router: ['react-router-dom'],
+          ui: ['framer-motion', 'lucide-react']
+        }
+      }
     }
   },
   optimizeDeps: {
     include: [
       'react-chartjs-2',
-      'chart.js'
+      'chart.js',
+      'react-router-dom',
+      'framer-motion'
     ]
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
   }
 });

@@ -26,12 +26,7 @@ const Login = () => {
     setLoading(true);
     
     try {
-      console.log('Attempting login with:', { email, password });
-      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      console.log('Stored users:', storedUsers);
-      
       const user = await login(email, password);
-      console.log('Login successful, user:', user);
       
       // Role-based navigation
       let redirectPath;
@@ -67,7 +62,7 @@ const Login = () => {
       
       navigate(redirectPath, { replace: true });
     } catch (err) {
-      console.error('Login error:', err);
+      console.warn('Login error:', err);
       setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);

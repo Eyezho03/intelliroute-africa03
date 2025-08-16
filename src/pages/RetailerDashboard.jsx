@@ -22,7 +22,10 @@ import {
   Truck,
   MapPin,
   CreditCard,
-  DollarSign
+  DollarSign,
+  Settings,
+  FileText,
+  Home
 } from 'lucide-react';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import {
@@ -45,7 +48,7 @@ const RetailerDashboard = ({ user }) => {
   const [retailerData, setRetailerData] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, orders, marketplace
+  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, orders, marketplace, deliveries, pricing, reports, settings
 
   useEffect(() => {
     // Simulate retailer data
@@ -277,6 +280,14 @@ const RetailerDashboard = ({ user }) => {
         </div>
         
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.location.href = '/'}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg transition"
+          >
+            <Home size={16} />
+            <span>Home</span>
+          </button>
+          
           <select
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value)}
@@ -296,7 +307,7 @@ const RetailerDashboard = ({ user }) => {
           <div className="flex border border-gray-600 rounded-lg overflow-hidden">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`px-4 py-2 text-sm font-medium transition ${
+              className={`px-3 py-2 text-xs font-medium transition ${
                 activeTab === 'dashboard'
                   ? 'bg-green-600 text-white'
                   : 'bg-gray-700/50 text-gray-300 hover:text-white'
@@ -305,24 +316,64 @@ const RetailerDashboard = ({ user }) => {
               Dashboard
             </button>
             <button
-              onClick={() => setActiveTab('orders')}
-              className={`px-4 py-2 text-sm font-medium transition ${
-                activeTab === 'orders'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-700/50 text-gray-300 hover:text-white'
-              }`}
-            >
-              Orders
-            </button>
-            <button
               onClick={() => setActiveTab('marketplace')}
-              className={`px-4 py-2 text-sm font-medium transition ${
+              className={`px-3 py-2 text-xs font-medium transition ${
                 activeTab === 'marketplace'
                   ? 'bg-green-600 text-white'
                   : 'bg-gray-700/50 text-gray-300 hover:text-white'
               }`}
             >
               Marketplace
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`px-3 py-2 text-xs font-medium transition ${
+                activeTab === 'orders'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-700/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              My Orders
+            </button>
+            <button
+              onClick={() => setActiveTab('deliveries')}
+              className={`px-3 py-2 text-xs font-medium transition ${
+                activeTab === 'deliveries'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-700/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              Deliveries
+            </button>
+            <button
+              onClick={() => setActiveTab('pricing')}
+              className={`px-3 py-2 text-xs font-medium transition ${
+                activeTab === 'pricing'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-700/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              Pricing
+            </button>
+            <button
+              onClick={() => setActiveTab('reports')}
+              className={`px-3 py-2 text-xs font-medium transition ${
+                activeTab === 'reports'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-700/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              Reports
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`px-3 py-2 text-xs font-medium transition ${
+                activeTab === 'settings'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-700/50 text-gray-300 hover:text-white'
+              }`}
+            >
+              Settings
             </button>
           </div>
           
@@ -340,6 +391,367 @@ const RetailerDashboard = ({ user }) => {
       
       {activeTab === 'marketplace' && (
         <SupplierMarketplace userRole="retailer" />
+      )}
+
+      {activeTab === 'deliveries' && (
+        <div className="space-y-6">
+          <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <Truck className="text-blue-400" size={28} />
+                Delivery Management
+              </h2>
+              <div className="flex gap-3">
+                <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg transition">
+                  Track All Deliveries
+                </button>
+                <button className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg transition">
+                  Schedule Pickup
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gray-700/30 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Clock className="text-yellow-400" size={20} />
+                  <h3 className="text-white font-medium">Pending Deliveries</h3>
+                </div>
+                <p className="text-2xl font-bold text-white">12</p>
+                <p className="text-gray-400 text-sm">Awaiting pickup</p>
+              </div>
+              <div className="bg-gray-700/30 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Truck className="text-blue-400" size={20} />
+                  <h3 className="text-white font-medium">In Transit</h3>
+                </div>
+                <p className="text-2xl font-bold text-white">8</p>
+                <p className="text-gray-400 text-sm">On the way</p>
+              </div>
+              <div className="bg-gray-700/30 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="text-green-400" size={20} />
+                  <h3 className="text-white font-medium">Delivered Today</h3>
+                </div>
+                <p className="text-2xl font-bold text-white">15</p>
+                <p className="text-gray-400 text-sm">Successfully completed</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {retailerData.deliveryTracking.map((delivery, index) => (
+                <div key={delivery.id} className="bg-gray-700/30 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <Truck className="h-6 w-6 text-blue-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-white font-medium">Order {delivery.id}</h4>
+                        <p className="text-gray-400 text-sm">{delivery.location}</p>
+                        <p className="text-gray-500 text-xs">Driver: {delivery.driver} • {delivery.driverPhone}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`px-3 py-1 rounded-full text-xs border ${getStatusColor(delivery.status)}`}>
+                        {delivery.status.replace('_', ' ').toUpperCase()}
+                      </div>
+                      <p className="text-sm mt-1 text-gray-400">
+                        ETA: {delivery.estimatedArrival}
+                      </p>
+                      <button className="text-blue-400 hover:text-blue-300 text-sm mt-1">
+                        Track Live
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'pricing' && (
+        <div className="space-y-6">
+          <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <DollarSign className="text-green-400" size={28} />
+                Pricing Management
+              </h2>
+              <div className="flex gap-3">
+                <button className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg transition">
+                  Update Prices
+                </button>
+                <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg transition">
+                  Price Analysis
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-gray-700/30 rounded-lg p-4">
+                <h3 className="text-white font-medium mb-2">Average Margin</h3>
+                <p className="text-2xl font-bold text-green-400">24.5%</p>
+                <p className="text-gray-400 text-sm">+2.1% from last month</p>
+              </div>
+              <div className="bg-gray-700/30 rounded-lg p-4">
+                <h3 className="text-white font-medium mb-2">Price Updates</h3>
+                <p className="text-2xl font-bold text-blue-400">47</p>
+                <p className="text-gray-400 text-sm">This month</p>
+              </div>
+              <div className="bg-gray-700/30 rounded-lg p-4">
+                <h3 className="text-white font-medium mb-2">Competitive Items</h3>
+                <p className="text-2xl font-bold text-yellow-400">23</p>
+                <p className="text-gray-400 text-sm">Need price review</p>
+              </div>
+              <div className="bg-gray-700/30 rounded-lg p-4">
+                <h3 className="text-white font-medium mb-2">Revenue Impact</h3>
+                <p className="text-2xl font-bold text-purple-400">+12.3%</p>
+                <p className="text-gray-400 text-sm">From pricing changes</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {retailerData.topProducts.map((product, index) => (
+                <div key={product.id} className="bg-gray-700/30 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-white font-medium">{product.name}</h4>
+                      <p className="text-gray-400 text-sm">{product.category}</p>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="text-center">
+                        <p className="text-gray-400 text-xs">Current Price</p>
+                        <p className="text-white font-medium">KES {(product.revenue / product.unitsSold).toFixed(0)}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400 text-xs">Margin</p>
+                        <p className="text-green-400 font-medium">{product.margin}%</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400 text-xs">Trend</p>
+                        <p className="text-2xl">{getTrendIcon(product.trend)}</p>
+                      </div>
+                      <button className="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-sm transition">
+                        Edit Price
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'reports' && (
+        <div className="space-y-6">
+          <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <FileText className="text-purple-400" size={28} />
+                Reports & Analytics
+              </h2>
+              <div className="flex gap-3">
+                <button className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg transition">
+                  Generate Report
+                </button>
+                <button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg transition">
+                  Export Data
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gray-700/30 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <BarChart3 className="text-blue-400" size={24} />
+                  <h3 className="text-white font-medium">Sales Report</h3>
+                </div>
+                <p className="text-gray-400 text-sm mb-4">Monthly sales performance and trends</p>
+                <button className="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg transition">
+                  View Report
+                </button>
+              </div>
+              <div className="bg-gray-700/30 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Package className="text-green-400" size={24} />
+                  <h3 className="text-white font-medium">Inventory Report</h3>
+                </div>
+                <p className="text-gray-400 text-sm mb-4">Stock levels and turnover analysis</p>
+                <button className="w-full bg-green-600 hover:bg-green-500 py-2 rounded-lg transition">
+                  View Report
+                </button>
+              </div>
+              <div className="bg-gray-700/30 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <TrendingUp className="text-purple-400" size={24} />
+                  <h3 className="text-white font-medium">Financial Report</h3>
+                </div>
+                <p className="text-gray-400 text-sm mb-4">Revenue, costs, and profit analysis</p>
+                <button className="w-full bg-purple-600 hover:bg-purple-500 py-2 rounded-lg transition">
+                  View Report
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-gray-700/30 rounded-lg p-6">
+              <h3 className="text-white font-medium mb-4">Recent Reports</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-600/30 rounded-lg">
+                  <div>
+                    <p className="text-white font-medium">Monthly Sales Summary - August 2024</p>
+                    <p className="text-gray-400 text-sm">Generated 2 days ago</p>
+                  </div>
+                  <button className="text-blue-400 hover:text-blue-300">Download</button>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-600/30 rounded-lg">
+                  <div>
+                    <p className="text-white font-medium">Inventory Turnover Analysis - Q2 2024</p>
+                    <p className="text-gray-400 text-sm">Generated 1 week ago</p>
+                  </div>
+                  <button className="text-blue-400 hover:text-blue-300">Download</button>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-600/30 rounded-lg">
+                  <div>
+                    <p className="text-white font-medium">Profit Margin Report - July 2024</p>
+                    <p className="text-gray-400 text-sm">Generated 2 weeks ago</p>
+                  </div>
+                  <button className="text-blue-400 hover:text-blue-300">Download</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'settings' && (
+        <div className="space-y-6">
+          <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <Settings className="text-gray-400" size={28} />
+                Settings & Configuration
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <div className="bg-gray-700/30 rounded-lg p-6">
+                  <h3 className="text-white font-medium mb-4">Store Information</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-2">Store Name</label>
+                      <input 
+                        type="text" 
+                        defaultValue="My Retail Store"
+                        className="w-full bg-gray-600/50 border border-gray-500 rounded-lg px-3 py-2 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-2">Contact Email</label>
+                      <input 
+                        type="email" 
+                        defaultValue={user?.email || "store@example.com"}
+                        className="w-full bg-gray-600/50 border border-gray-500 rounded-lg px-3 py-2 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-2">Phone Number</label>
+                      <input 
+                        type="tel" 
+                        defaultValue="+254 700 000 000"
+                        className="w-full bg-gray-600/50 border border-gray-500 rounded-lg px-3 py-2 text-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-700/30 rounded-lg p-6">
+                  <h3 className="text-white font-medium mb-4">Notification Preferences</h3>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-gray-300">Order confirmations</span>
+                    </label>
+                    <label className="flex items-center gap-3">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-gray-300">Delivery updates</span>
+                    </label>
+                    <label className="flex items-center gap-3">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-gray-300">Low stock alerts</span>
+                    </label>
+                    <label className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded" />
+                      <span className="text-gray-300">Marketing promotions</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-gray-700/30 rounded-lg p-6">
+                  <h3 className="text-white font-medium mb-4">Business Settings</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-2">Default Currency</label>
+                      <select className="w-full bg-gray-600/50 border border-gray-500 rounded-lg px-3 py-2 text-white">
+                        <option>KES - Kenyan Shilling</option>
+                        <option>USD - US Dollar</option>
+                        <option>EUR - Euro</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-2">Time Zone</label>
+                      <select className="w-full bg-gray-600/50 border border-gray-500 rounded-lg px-3 py-2 text-white">
+                        <option>EAT - East Africa Time</option>
+                        <option>UTC - Coordinated Universal Time</option>
+                        <option>GMT - Greenwich Mean Time</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-2">Language</label>
+                      <select className="w-full bg-gray-600/50 border border-gray-500 rounded-lg px-3 py-2 text-white">
+                        <option>English</option>
+                        <option>Swahili</option>
+                        <option>French</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-700/30 rounded-lg p-6">
+                  <h3 className="text-white font-medium mb-4">Account Actions</h3>
+                  <div className="space-y-3">
+                    <button className="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg transition">
+                      Change Password
+                    </button>
+                    <button className="w-full bg-green-600 hover:bg-green-500 py-2 rounded-lg transition">
+                      Export Data
+                    </button>
+                    <button className="w-full bg-yellow-600 hover:bg-yellow-500 py-2 rounded-lg transition">
+                      Download Backup
+                    </button>
+                    <button className="w-full bg-red-600 hover:bg-red-500 py-2 rounded-lg transition">
+                      Delete Account
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button className="bg-gray-600 hover:bg-gray-500 px-6 py-2 rounded-lg transition">
+                Cancel
+              </button>
+              <button className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded-lg transition">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       
       {activeTab === 'dashboard' && (

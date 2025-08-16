@@ -28,6 +28,7 @@ import Footer from './components/Footer';
 import PrivateRoute from './components/PrivateRoute';
 import DashboardLayout from './components/DashboardLayout';
 import ErrorBoundary from './components/ErrorBoundary';
+import ProductionErrorBoundary from './components/ProductionErrorBoundary';
 import TechShowcase from './components/TechShowcase';
 import AIChatbot from './components/AIChatbot';
 import EnhancedAIChat from './components/EnhancedAIChat';
@@ -74,61 +75,61 @@ const HomeLayout = () => (
 
 const App = () => {
   return (
-    <ErrorBoundary>
-      {/* Global AI Chatbot - Available on all pages */}
-      <AIChatbot />
-      
-      {/* PWA Install Banner - Smart timing */}
-      <PWAInstallBanner />
-      
-      <Routes>
-      {/* Demo Backend Integration Route */}
-      <Route path="/demo" element={<MainApp />} />
-      
-      {/* Home Page Route */}
-      <Route path="/" element={<HomeLayout />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <ProductionErrorBoundary>
+          <ErrorBoundary>
+            {/* Global AI Chatbot - Available on all pages */}
+            <AIChatbot />
+            
+            {/* PWA Install Banner - Smart timing */}
+            <PWAInstallBanner />
+            
+            <Routes>
+              {/* Demo Backend Integration Route */}
+              <Route path="/demo" element={<MainApp />} />
+              
+              {/* Home Page Route */}
+              <Route path="/" element={<HomeLayout />} />
 
-      {/* Auth Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+              {/* Auth Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-      {/* Standalone Routes for Navigation */}
-      <Route path="/route-optimizer" element={<RouteOptimizer />} />
-      <Route path="/tracking" element={<LiveTracking />} />
-      <Route path="/analytics" element={<AnalyticsDashboard />} />
-      <Route path="/intelligence" element={<RealTimeIntelligenceHub />} />
-      <Route path="/new-delivery" element={<NewDelivery />} />
-      <Route path="/schedule-route" element={<ScheduleRoute />} />
-      <Route path="/inventory" element={<SupplyChainInventory />} />
+              {/* Standalone Routes for Navigation */}
+              <Route path="/route-optimizer" element={<RouteOptimizer />} />
+              <Route path="/tracking" element={<LiveTracking />} />
+              <Route path="/analytics" element={<AnalyticsDashboard />} />
+              <Route path="/intelligence" element={<RealTimeIntelligenceHub />} />
+              <Route path="/new-delivery" element={<NewDelivery />} />
+              <Route path="/schedule-route" element={<ScheduleRoute />} />
+              <Route path="/inventory" element={<SupplyChainInventory />} />
 
-      {/* Protected Dashboard Routes */}
-      <Route 
-        path="/dashboard" 
-        element={
-          <PrivateRoute>
-            <DashboardLayout />
-          </PrivateRoute>
-        }
-      >
-        {/* Nested dashboard routes */}
-        <Route index element={<Dashboard />} />
-        <Route path="manufacturer" element={<ManufacturerDashboard />} />
-        <Route path="wholesaler" element={<WholesalerDashboard />} />
-        <Route path="retailer" element={<RetailerDashboard />} />
-        <Route path="driver" element={<DriverDashboard />} />
-        <Route path="admin" element={<AdminPanel />} />
-        <Route path="fleet-manager" element={<FleetManagerDashboard />} />
-        <Route path="operation-manager" element={<OperationManagerDashboard />} />
-        <Route path="supply-chain" element={<SupplyChainDashboard />} />
-        <Route path="intelligence-hub" element={<RealTimeIntelligenceHub />} />
-        <Route path="ai" element={<AIDashboard />} />
-        <Route path="advanced-analytics" element={<AdvancedDashboard />} />
-        <Route path="inventory" element={<SupplyChainInventory />} />
-        <Route path="order-management" element={<OrderManagementDashboard />} />
-        <Route path="orders" element={<OrderFlow />} />
-      </Route>
-      </Routes>
-    </ErrorBoundary>
+              {/* Protected Dashboard Routes */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <PrivateRoute>
+                    <DashboardLayout />
+                  </PrivateRoute>
+                }
+              >
+                {/* Nested dashboard routes */}
+                <Route index element={<Dashboard />} />
+                <Route path="manufacturer" element={<ManufacturerDashboard />} />
+                <Route path="wholesaler" element={<WholesalerDashboard />} />
+                <Route path="retailer" element={<RetailerDashboard />} />
+                <Route path="driver" element={<DriverDashboard />} />
+                <Route path="admin" element={<AdminPanel />} />
+                <Route path="fleet-manager" element={<FleetManagerDashboard />} />
+                <Route path="operation-manager" element={<OperationManagerDashboard />} />
+                <Route path="supply-chain" element={<SupplyChainDashboard />} />
+              </Route>
+            </Routes>
+          </ErrorBoundary>
+        </ProductionErrorBoundary>
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 

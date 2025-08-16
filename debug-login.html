@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Login Debug Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .step { background: #f0f8ff; padding: 15px; margin: 10px 0; border-left: 4px solid #2196F3; }
+        .credentials { background: #e8f5e8; padding: 15px; border: 2px solid #4CAF50; margin: 15px 0; }
+        .warning { background: #fff3cd; padding: 15px; border: 1px solid #ffeaa7; margin: 15px 0; }
+        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #45a049; }
+        .debug-info { background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🚛 Driver Login Debug Tool</h1>
+    
+    <div class="warning">
+        <strong>⚠️ Troubleshooting Driver Login Issues</strong>
+    </div>
+
+    <div class="step">
+        <strong>Step 1:</strong> Check if your React server is running
+        <br><button onclick="checkServer()">Check Server Status</button>
+        <div id="serverStatus"></div>
+    </div>
+
+    <div class="step">
+        <strong>Step 2:</strong> Clear browser storage and recreate demo users
+        <br><button onclick="clearAndRecreate()">Clear & Recreate Demo Users</button>
+        <div id="storageStatus"></div>
+    </div>
+
+    <div class="credentials">
+        <h3>🔑 Driver Credentials:</h3>
+        <strong>Email:</strong> driver@intelliroute.com<br>
+        <strong>Password:</strong> driver123<br>
+        <button onclick="copyCredentials()">Copy Credentials</button>
+    </div>
+
+    <div class="step">
+        <strong>Step 3:</strong> Test login directly
+        <br><button onclick="testLogin()">Test Driver Login</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="step">
+        <strong>Step 4:</strong> Check current storage
+        <br><button onclick="checkStorage()">Check Local Storage</button>
+        <div id="storageInfo" class="debug-info"></div>
+    </div>
+
+    <div class="step">
+        <strong>Manual Fix:</strong> If all else fails
+        <br><button onclick="manualFix()">Apply Manual Fix</button>
+        <div id="manualResult"></div>
+    </div>
+
+    <script>
+        function checkServer() {
+            const status = document.getElementById('serverStatus');
+            fetch('http://localhost:3000')
+                .then(() => {
+                    status.innerHTML = '<span style="color: green;">✅ Server is running</span>';
+                })
+                .catch(() => {
+                    status.innerHTML = '<span style="color: red;">❌ Server not running. Please start with: npm start</span>';
+                });
+        }
+
+        function clearAndRecreate() {
+            localStorage.clear();
+            
+            const demoUsers = [
+                {
+                    id: Date.now() + 1,
+                    fullName: 'Admin User',
+                    email: 'admin@intelliroute.com',
+                    password: 'admin123',
+                    role: 'admin',
+                    company: 'IntelliRoute Africa'
+                },
+                {
+                    id: Date.now() + 2,
+                    fullName: 'John Driver',
+                    email: 'driver@intelliroute.com',
+                    password: 'driver123',
+                    role: 'driver',
+                    company: 'IntelliRoute Logistics',
+                    vehicleId: 'KBZ-123A'
+                }
+            ];
+            
+            localStorage.setItem('users', JSON.stringify(demoUsers));
+            document.getElementById('storageStatus').innerHTML = '<span style="color: green;">✅ Demo users created successfully</span>';
+        }
+
+        function copyCredentials() {
+            navigator.clipboard.writeText('driver@intelliroute.com\ndriver123').then(() => {
+                alert('✅ Credentials copied to clipboard!');
+            });
+        }
+
+        function testLogin() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const driver = users.find(u => u.email === 'driver@intelliroute.com' && u.password === 'driver123');
+            
+            const result = document.getElementById('loginResult');
+            if (driver) {
+                // Simulate successful login
+                const token = `token-${Date.now()}-${Math.random()}`;
+                localStorage.setItem('token', token);
+                localStorage.setItem('currentUser', JSON.stringify(driver));
+                
+                result.innerHTML = '<span style="color: green;">✅ Login test successful! You can now access the driver dashboard.</span>';
+                
+                // Redirect to driver dashboard
+                setTimeout(() => {
+                    window.open('http://localhost:3000/dashboard/driver', '_blank');
+                }, 1000);
+            } else {
+                result.innerHTML = '<span style="color: red;">❌ Driver user not found. Please recreate demo users.</span>';
+            }
+        }
+
+        function checkStorage() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const token = localStorage.getItem('token');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            const info = document.getElementById('storageInfo');
+            info.innerHTML = `
+                <strong>Users in storage:</strong> ${users.length}<br>
+                <strong>Driver exists:</strong> ${users.some(u => u.email === 'driver@intelliroute.com') ? 'Yes' : 'No'}<br>
+                <strong>Token:</strong> ${token ? 'Present' : 'None'}<br>
+                <strong>Current User:</strong> ${currentUser ? JSON.parse(currentUser).fullName || 'Unknown' : 'None'}<br>
+                <br>
+                <strong>All Users:</strong><br>
+                ${users.map(u => `- ${u.fullName} (${u.email}) - Role: ${u.role}`).join('<br>')}
+            `;
+        }
+
+        function manualFix() {
+            // Force create driver user and login
+            const driverUser = {
+                id: Date.now(),
+                fullName: 'John Driver',
+                email: 'driver@intelliroute.com',
+                password: 'driver123',
+                role: 'driver',
+                company: 'IntelliRoute Logistics',
+                vehicleId: 'KBZ-123A',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Get existing users and add/update driver
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const filteredUsers = users.filter(u => u.email !== 'driver@intelliroute.com');
+            filteredUsers.push(driverUser);
+            
+            localStorage.setItem('users', JSON.stringify(filteredUsers));
+            
+            // Set login state
+            const token = `token-${Date.now()}-${Math.random()}`;
+            localStorage.setItem('token', token);
+            localStorage.setItem('currentUser', JSON.stringify(driverUser));
+            
+            document.getElementById('manualResult').innerHTML = '<span style="color: green;">✅ Manual fix applied! Driver user created and logged in.</span>';
+            
+            setTimeout(() => {
+                window.open('http://localhost:3000/dashboard/driver', '_blank');
+            }, 1000);
+        }
+
+        // Auto-check server status on load
+        window.onload = function() {
+            checkServer();
+            checkStorage();
+        };
+    </script>
+</body>
+</html>

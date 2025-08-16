@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const verifyToken = async (token) => {
     try {
       if (!token) throw new Error('No token found');
-      
+
       // In a real app, this would call your backend to verify the token
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         setAuth({ isAuthenticated: false, user: null, loading: false, error: null });
         return;
       }
-      
+
       const userData = await verifyToken(token);
       setAuth({ isAuthenticated: true, user: userData, loading: false, error: null });
     } catch (err) {
@@ -57,15 +57,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setAuth(prev => ({ ...prev, loading: true, error: null }));
-      
+
       const response = await apiService.login({ email, password });
-      
+
       if (response.user && response.token) {
-        setAuth({ 
-          isAuthenticated: true, 
-          user: response.user, 
-          loading: false, 
-          error: null 
+        setAuth({
+          isAuthenticated: true,
+          user: response.user,
+          loading: false,
+          error: null
         });
         return response.user;
       } else {
@@ -73,11 +73,11 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       const errorMessage = err.message || 'Login failed. Please try again.';
-      setAuth({ 
-        isAuthenticated: false, 
-        user: null, 
-        loading: false, 
-        error: errorMessage 
+      setAuth({
+        isAuthenticated: false,
+        user: null,
+        loading: false,
+        error: errorMessage
       });
       throw err;
     }
@@ -87,15 +87,15 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setAuth(prev => ({ ...prev, loading: true, error: null }));
-      
+
       const response = await apiService.register(userData);
-      
+
       if (response.user && response.token) {
-        setAuth({ 
-          isAuthenticated: true, 
-          user: response.user, 
-          loading: false, 
-          error: null 
+        setAuth({
+          isAuthenticated: true,
+          user: response.user,
+          loading: false,
+          error: null
         });
         return response.user;
       } else {
@@ -103,11 +103,11 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       const errorMessage = err.message || 'Registration failed. Please try again.';
-      setAuth({ 
-        isAuthenticated: false, 
-        user: null, 
-        loading: false, 
-        error: errorMessage 
+      setAuth({
+        isAuthenticated: false,
+        user: null,
+        loading: false,
+        error: errorMessage
       });
       throw err;
     }
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
       setAuth({ isAuthenticated: false, user: null, loading: false, error: null });
     }
   };
-  
+
   // Update profile function
   const updateProfile = async (userData) => {
     try {
@@ -141,13 +141,13 @@ export const AuthProvider = ({ children }) => {
   }, [refreshAuth]);
 
   return (
-    <AuthContext.Provider value={{ 
-      ...auth, 
-      login, 
-      logout, 
-      register, 
+    <AuthContext.Provider value={{
+      ...auth,
+      login,
+      logout,
+      register,
       refreshAuth,
-      updateProfile 
+      updateProfile
     }}>
       {children}
     </AuthContext.Provider>
