@@ -118,30 +118,20 @@ const AboutUs = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
-              <span className="block">Intelligent Routing Solutions</span>
+              <span className="block">AI-Powered Logistics</span>
               <span className="block mt-3 bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                Designed for Africa
+                Built for Africa
               </span>
             </motion.h2>
-            
-            <motion.p 
-              className="text-lg md:text-xl text-gray-400 mb-6 leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-            >
-              At <span className="text-emerald-400 font-semibold">Intelliroute Africa</span>, we're pioneering AI-powered logistics optimization to solve Africa's unique supply chain challenges. Our platform combines deep local knowledge with cutting-edge technology to revolutionize how goods move across the continent.
-            </motion.p>
             
             <motion.p 
               className="text-lg md:text-xl text-gray-400 mb-10 leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.4 }}
             >
-              We're not just optimizing routes - we're building the digital infrastructure for Africa's economic growth, enabling businesses to overcome infrastructure limitations, border complexities, and operational inefficiencies.
+              We're building the digital infrastructure for Africa's supply chains. Our AI-powered platform solves border delays, road conditions, and operational inefficiencies with intelligent routing and real-time coordination.
             </motion.p>
             
             {/* Features Grid */}
@@ -347,65 +337,37 @@ const AboutUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mt-16 md:mt-24 bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl border border-gray-700 p-6 md:p-12 overflow-hidden"
+          className="mt-16 md:mt-24 bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl border border-gray-700 p-8 overflow-hidden"
         >
-          <div className="max-w-4xl mx-auto text-center relative">
-            {/* Animated elements */}
-            <motion.div 
-              className="absolute -top-10 -left-10 w-20 h-20 rounded-full bg-emerald-500/10 blur-xl"
-              animate={{ 
-                scale: [1, 1.5, 1],
-                opacity: [0.2, 0.4, 0.2]
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            
-            <motion.div 
-              className="absolute -bottom-10 -right-10 w-24 h-24 rounded-full bg-amber-500/10 blur-xl"
-              animate={{ 
-                scale: [1, 1.6, 1],
-                opacity: [0.2, 0.5, 0.2]
-              }}
-              transition={{
-                duration: 7,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1
-              }}
-            />
-            
+          <div className="max-w-3xl mx-auto text-center relative">
             <motion.h3 
-              className="text-2xl md:text-3xl font-bold text-white mb-6"
+              className="text-2xl font-bold text-white mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              Our Mission: Digitizing Africa's Supply Chain Infrastructure
+              Our Mission: Digitizing Africa's Supply Chain
             </motion.h3>
             
             <motion.p 
-              className="text-lg md:text-xl text-gray-400 mb-8"
+              className="text-lg text-gray-400 mb-8"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
-              We're building the logistics operating system for Africa - a platform that empowers businesses to navigate the continent's complexities while driving economic growth and sustainability. By combining AI with deep local expertise, we're creating solutions that work for Africa's unique challenges.
+              Building the logistics operating system for Africa - empowering businesses to navigate the continent's complexities with AI-powered solutions.
             </motion.p>
             
             <motion.div 
-              className="flex flex-wrap justify-center gap-4 mt-10"
+              className="flex flex-wrap justify-center gap-3 mt-8"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4, staggerChildren: 0.1 }}
             >
-              {["Real-Time Visibility", "Border Optimization", "Cost Reduction", "Sustainability Focus"].map((item, index) => (
+              {["Real-Time Visibility", "Border Optimization", "Cost Reduction", "Sustainability"].map((item, index) => (
                 <motion.div
                   key={index}
                   className="px-4 py-2 bg-gray-700/50 rounded-full border border-gray-600 backdrop-blur-sm"

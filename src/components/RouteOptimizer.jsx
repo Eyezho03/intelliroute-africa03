@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../contexts/ThemeContext';
+import { showToast } from './Toast';
+import { LoadingSpinner, LoadingOverlay } from './Loading';
+import { cn, formatCurrency, formatRelativeTime } from '../utils';
 import {
   Route,
   MapPin,
@@ -12,13 +16,30 @@ import {
   RefreshCw,
   Navigation,
   Fuel,
-  DollarSign
+  DollarSign,
+  Play,
+  Pause,
+  Download,
+  Share,
+  Star,
+  Filter,
+  Search,
+  Plus,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 const RouteOptimizer = () => {
   const [routes, setRoutes] = useState([]);
   const [optimizing, setOptimizing] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const [viewMode, setViewMode] = useState('grid'); // grid, list, map
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [favorites, setFavorites] = useState(new Set());
+  
+  const { theme } = useTheme();
   
   const mockRoutes = [
     {
@@ -28,10 +49,15 @@ const RouteOptimizer = () => {
       destination: 'Accra, Ghana',
       distance: '342 km',
       duration: '4h 30m',
-      fuelCost: '$120',
-      savings: '15%',
+      fuelCost: 120,
+      savings: 15,
       status: 'optimized',
-      waypoints: 5
+      waypoints: 5,
+      rating: 4.8,
+      traffic: 'low',
+      weather: 'clear',
+      lastUpdated: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      tags: ['cross-border', 'priority', 'efficient']
     },
     {
       id: 2,
@@ -40,10 +66,15 @@ const RouteOptimizer = () => {
       destination: 'Mombasa, Kenya',
       distance: '485 km',
       duration: '6h 15m',
-      fuelCost: '$85',
-      savings: '22%',
+      fuelCost: 85,
+      savings: 22,
       status: 'pending',
-      waypoints: 3
+      waypoints: 3,
+      rating: 4.5,
+      traffic: 'medium',
+      weather: 'partly-cloudy',
+      lastUpdated: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+      tags: ['domestic', 'coastal']
     },
     {
       id: 3,
@@ -52,43 +83,85 @@ const RouteOptimizer = () => {
       destination: 'Multiple Stops',
       distance: '267 km',
       duration: '8h 45m',
-      fuelCost: '$95',
-      savings: '18%',
+      fuelCost: 95,
+      savings: 18,
       status: 'optimized',
-      waypoints: 12
+      waypoints: 8,
+      rating: 4.2,
+      traffic: 'high',
+      weather: 'rainy',
+      lastUpdated: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+      tags: ['distribution', 'multi-stop', 'urban']
     }
   ];
+
+  // Enhanced functionality
+  const toggleFavorite = useCallback((routeId) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(routeId)) {
+        newFavorites.delete(routeId);
+        showToast.info('Route removed from favorites');
+      } else {
+        newFavorites.add(routeId);
+        showToast.success('Route added to favorites');
+      }
+      return newFavorites;
+    });
+  }, []);
+
+  const optimizeRoute = useCallback(async (routeId) => {
+    setOptimizing(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      showToast.success('Route optimization completed!');
+    } catch (error) {
+      showToast.error('Failed to optimize route');
+    } finally {
+      setOptimizing(false);
+    }
+  }, []);
+
+  const filteredRoutes = routes.filter(route => {
+    const matchesSearch = route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         route.origin.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         route.destination.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesFilter = filterStatus === 'all' || route.status === filterStatus;
+    const matchesFavorites = !showFavorites || favorites.has(route.id);
+    
+    return matchesSearch && matchesFilter && matchesFavorites;
+  });
 
   useEffect(() => {
     setRoutes(mockRoutes);
   }, []);
 
-  const optimizeRoute = (routeId) => {
+  const optimizeAllRoutes = useCallback(async () => {
     setOptimizing(true);
-    setTimeout(() => {
-      setRoutes(prev => prev.map(route => 
-        route.id === routeId 
-          ? { ...route, status: 'optimized', savings: `${Math.floor(Math.random() * 10 + 15)}%` }
-          : route
-      ));
-      setOptimizing(false);
-    }, 2000);
-  };
-
-  const optimizeAllRoutes = () => {
-    setOptimizing(true);
-    setTimeout(() => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 3000));
       setRoutes(prev => prev.map(route => ({
         ...route,
         status: 'optimized',
-        savings: `${Math.floor(Math.random() * 10 + 15)}%`
+        savings: Math.floor(Math.random() * 10 + 15)
       })));
+      showToast.success('All routes optimized successfully!');
+    } catch (error) {
+      showToast.error('Failed to optimize routes');
+    } finally {
       setOptimizing(false);
-    }, 3000);
-  };
+    }
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div className={cn(
+      "min-h-screen p-6 transition-colors duration-300",
+      theme === 'dark' 
+        ? "bg-gradient-to-br from-gray-900 to-gray-800" 
+        : "bg-gradient-to-br from-gray-50 to-gray-100"
+    )}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -96,28 +169,61 @@ const RouteOptimizer = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
+              <motion.div 
+                className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Route className="w-8 h-8 text-white" />
-              </div>
+              </motion.div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Route Optimizer</h1>
-                <p className="text-gray-600">AI-Powered Route Planning & Optimization</p>
+                <h1 className={cn(
+                  "text-3xl font-bold",
+                  theme === 'dark' ? "text-white" : "text-gray-900"
+                )}>
+                  Route Optimizer
+                </h1>
+                <p className={cn(
+                  theme === 'dark' ? "text-gray-300" : "text-gray-600"
+                )}>
+                  AI-Powered Route Planning & Optimization
+                </p>
               </div>
             </div>
-            <button
-              onClick={optimizeAllRoutes}
-              disabled={optimizing}
-              className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 disabled:opacity-50"
-            >
-              {optimizing ? (
-                <RefreshCw className="w-5 h-5 animate-spin" />
-              ) : (
-                <Zap className="w-5 h-5" />
-              )}
-              {optimizing ? 'Optimizing...' : 'Optimize All Routes'}
-            </button>
+            
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={optimizeAllRoutes}
+                disabled={optimizing}
+                className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 disabled:opacity-50"
+              >
+                {optimizing ? (
+                  <LoadingSpinner size="sm" className="text-white" />
+                ) : (
+                  <Zap className="w-5 h-5" />
+                )}
+                {optimizing ? 'Optimizing...' : 'Optimize All Routes'}
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={cn(
+                  "px-4 py-3 rounded-lg transition-colors flex items-center gap-2",
+                  theme === 'dark' 
+                    ? "bg-gray-700 hover:bg-gray-600 text-white"
+                    : "bg-white hover:bg-gray-50 text-gray-700 border border-gray-200"
+                )}
+              >
+                <Settings className="w-5 h-5" />
+                Settings
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 

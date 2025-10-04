@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/intellirouteafrica5.jpg';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { useSidebar, useSearch } from '../stores/appStore';
+import { showToast } from './Toast';
+import { cn, debounce } from '../utils';
 import {
   Menu,
   X,
@@ -20,8 +25,19 @@ import {
   Layers,
   Shield,
   ArrowRight,
-  HelpCircle
+  HelpCircle,
+  Sun,
+  Moon,
+  Command,
+  Keyboard,
+  Zap
 } from 'lucide-react';
+import { 
+  AnimatedTruck, 
+  BouncingPackage, 
+  FloatingMapPin, 
+  SparklingStar 
+} from './CartoonAnimations';
 
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import NotificationSystem from './NotificationSystem';
@@ -30,13 +46,16 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [activeRoute, setActiveRoute] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const menuRef = useRef(null);
   const userDropdownRef = useRef(null);
   const searchRef = useRef(null);
+  
   const { user, login, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { isOpen: sidebarOpen, toggle: toggleSidebar } = useSidebar();
+  const { query: searchQuery, results: searchResults, setQuery, setResults } = useSearch();
+  
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -67,11 +86,10 @@ const Navbar = () => {
     { id: 8, title: 'Schedule Route Planning', type: 'schedule', category: 'Planning', url: '/schedule-route' }
   ];
 
-  // Search functionality
-  const handleSearch = (query) => {
-    setSearchQuery(query);
+  // Debounced search functionality
+  const debouncedSearch = debounce((query) => {
     if (query.trim() === '') {
-      setSearchResults([]);
+      setResults([]);
       setShowSearchResults(false);
       return;
     }
@@ -81,15 +99,51 @@ const Navbar = () => {
       item.category.toLowerCase().includes(query.toLowerCase())
     );
 
-    setSearchResults(filtered.slice(0, 5)); // Limit to 5 results
+    setResults(filtered.slice(0, 5)); // Limit to 5 results
     setShowSearchResults(true);
+  }, 300);
+
+  const handleSearch = (query) => {
+    setQuery(query);
+    debouncedSearch(query);
   };
 
   const handleSearchItemClick = (item) => {
-    setSearchQuery('');
+    setQuery('');
     setShowSearchResults(false);
     navigate(item.url);
+    showToast.success(`Navigating to ${item.title}`);
   };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Ctrl/Cmd + K for search
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        const searchInput = searchRef.current?.querySelector('input');
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+      
+      // Escape to close dropdowns
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        setUserDropdownOpen(false);
+        setShowSearchResults(false);
+      }
+      
+      // Ctrl/Cmd + B for sidebar toggle
+      if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
+        event.preventDefault();
+        toggleSidebar();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [toggleSidebar]);
 
   // Click outside handlers for menus
   useEffect(() => {
@@ -146,32 +200,91 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-8 lg:px-16 py-3 bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 shadow-xl">
+    <header className={cn(
+      "sticky top-0 z-50 flex items-center justify-between px-4 md:px-8 lg:px-16 py-3 border-b shadow-xl transition-all duration-300",
+      theme === 'dark' 
+        ? "bg-gradient-to-r from-gray-900 to-gray-800 border-gray-700" 
+        : "bg-white/80 backdrop-blur-md border-gray-200"
+    )}>
       {/* Logo with tagline */}
-      <div className="flex items-center font-bold text-white gap-2">
-        <Link to="/" className="flex items-center gap-2">
-          <img
-            src={logo}
-            alt="Intelliroute Africa Logo"
-            className="h-12 w-auto object-contain rounded-lg border border-gray-600"
-          />
+      <div className="flex items-center font-bold gap-2">
+        <Link to="/" className="flex items-center gap-2 group">
+          <motion.div
+            className="relative"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <motion.img
+              src={logo}
+              alt="Intelliroute Africa Logo"
+              className="h-12 w-auto object-contain rounded-lg border transition-all duration-300 group-hover:scale-105"
+              whileHover={{ rotate: 5 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            />
+            {/* Floating cartoon characters around logo */}
+            <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <AnimatedTruck size="sm" />
+            </div>
+            <div className="absolute -bottom-1 -left-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <BouncingPackage size="sm" />
+            </div>
+          </motion.div>
           <div>
-            <div className="flex items-center gap-1">
-              <span className="text-lg bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+            <motion.div 
+              className="flex items-center gap-1"
+              animate={{
+                textShadow: [
+                  "0 0 0px rgba(16, 185, 129, 0)",
+                  "0 0 10px rgba(16, 185, 129, 0.3)",
+                  "0 0 0px rgba(16, 185, 129, 0)"
+                ]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity
+              }}
+            >
+              <span className={cn(
+                "text-lg bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent",
+                theme === 'light' && "from-emerald-600 to-teal-600"
+              )}>
                 Intelliroute-Africa
               </span>
-            </div>
-            <p className="text-xs text-gray-300 font-normal">AI-Powered Logistics</p>
+            </motion.div>
+            <motion.p 
+              className={cn(
+                "text-xs font-normal",
+                theme === 'dark' ? "text-gray-300" : "text-gray-600"
+              )}
+              animate={{
+                opacity: [0.7, 1, 0.7]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity
+              }}
+            >
+              AI-Powered Logistics
+            </motion.p>
           </div>
-
-
         </Link>
       </div>
 
       {/* Desktop Search & Navigation */}
       <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
         <div className="relative w-full" ref={searchRef}>
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <motion.div
+            animate={{
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity
+            }}
+          >
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          </motion.div>
           <input
             type="text"
             value={searchQuery}
@@ -218,14 +331,45 @@ const Navbar = () => {
             to={item.href}
             className={`flex items-center gap-1.5 group hover:text-white transition-colors ${activeRoute.includes(item.href) ? 'text-emerald-400' : ''}`}
           >
-            {item.icon && <span className={activeRoute.includes(item.href) ? 'text-emerald-400' : 'text-gray-400'}>{item.icon}</span>}
+            <motion.span 
+              className={activeRoute.includes(item.href) ? 'text-emerald-400' : 'text-gray-400'}
+              animate={{
+                rotate: activeRoute.includes(item.href) ? [0, 5, -5, 0] : 0,
+                scale: activeRoute.includes(item.href) ? [1, 1.1, 1] : 1
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity
+              }}
+            >
+              {item.icon && item.icon}
+            </motion.span>
             <span className="font-medium">{item.name}</span>
             {item.beta && (
-              <span className="text-[0.6rem] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
+              <motion.span 
+                className="text-[0.6rem] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full"
+                animate={{
+                  scale: [1, 1.1, 1],
+                  opacity: [0.8, 1, 0.8]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity
+                }}
+              >
                 BETA
-              </span>
+              </motion.span>
             )}
-            <span className={`block h-0.5 bg-gradient-to-r from-emerald-400 to-teal-300 w-0 group-hover:w-full transition-all duration-300 ${activeRoute.includes(item.href) ? 'w-full' : ''}`}></span>
+            <motion.span 
+              className={`block h-0.5 bg-gradient-to-r from-emerald-400 to-teal-300 w-0 group-hover:w-full transition-all duration-300 ${activeRoute.includes(item.href) ? 'w-full' : ''}`}
+              animate={{
+                backgroundPosition: activeRoute.includes(item.href) ? ["0% 50%", "100% 50%", "0% 50%"] : "0% 50%"
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity
+              }}
+            ></motion.span>
           </Link>
         ))}
       </nav>
@@ -234,16 +378,88 @@ const Navbar = () => {
       <div className="hidden md:flex items-center gap-5">
         <div className="flex items-center gap-3">
           {quickActions.map((action, index) => (
-            <Link
+            <motion.div
               key={index}
-              to={action.href}
-              className="p-2 bg-gray-800 hover:bg-gray-750 rounded-lg text-gray-300 hover:text-emerald-400 transition-colors"
-              title={action.name}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{
+                y: [0, -2, 0]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                delay: index * 0.5
+              }}
             >
-              {action.icon}
-            </Link>
+              <Link
+                to={action.href}
+                className={cn(
+                  "p-2 rounded-lg transition-colors relative",
+                  theme === 'dark' 
+                    ? "bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-emerald-400"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-emerald-600"
+                )}
+                title={action.name}
+              >
+                <motion.div
+                  animate={{
+                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: index * 0.3
+                  }}
+                >
+                  {action.icon}
+                </motion.div>
+                {/* Floating cartoon character on hover */}
+                <div className="absolute -top-1 -right-1 opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <FloatingMapPin size="sm" />
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
+
+        {/* Theme Toggle */}
+        <motion.button
+          onClick={toggleTheme}
+          className={cn(
+            "p-2 rounded-lg transition-colors relative",
+            theme === 'dark' 
+              ? "bg-gray-800 hover:bg-gray-750 text-gray-300 hover:text-yellow-400"
+              : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-yellow-600"
+          )}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity
+          }}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+              rotate: [0, 180, 360]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity
+            }}
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </motion.div>
+          {/* Floating star on hover */}
+          <div className="absolute -top-1 -right-1 opacity-0 hover:opacity-100 transition-opacity duration-300">
+            <SparklingStar size="sm" />
+          </div>
+        </motion.button>
 
         <NotificationSystem />
 

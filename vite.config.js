@@ -8,6 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  server: {
+    hmr: {
+      port: 24678,
+    },
+    watch: {
+      usePolling: true,
+    },
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,

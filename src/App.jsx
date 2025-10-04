@@ -75,17 +75,15 @@ const HomeLayout = () => (
 
 const App = () => {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <ProductionErrorBoundary>
-          <ErrorBoundary>
-            {/* Global AI Chatbot - Available on all pages */}
-            <AIChatbot />
-            
-            {/* PWA Install Banner - Smart timing */}
-            <PWAInstallBanner />
-            
-            <Routes>
+    <ProductionErrorBoundary>
+      <ErrorBoundary>
+        {/* Global AI Chatbot - Available on all pages */}
+        <AIChatbot />
+        
+        {/* PWA Install Banner - Smart timing */}
+        <PWAInstallBanner />
+        
+        <Routes>
               {/* Demo Backend Integration Route */}
               <Route path="/demo" element={<MainApp />} />
               
@@ -125,11 +123,51 @@ const App = () => {
                 <Route path="operation-manager" element={<OperationManagerDashboard />} />
                 <Route path="supply-chain" element={<SupplyChainDashboard />} />
               </Route>
-            </Routes>
-          </ErrorBoundary>
-        </ProductionErrorBoundary>
-      </BrowserRouter>
-    </AuthProvider>
+
+              {/* Direct Admin Routes */}
+              <Route 
+                path="/admin" 
+                element={
+                  <PrivateRoute>
+                    <AdminPanel />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
+                path="/admin/analytics" 
+                element={
+                  <PrivateRoute>
+                    <AdminPanel />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
+                path="/admin/users" 
+                element={
+                  <PrivateRoute>
+                    <AdminPanel />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
+                path="/admin/support" 
+                element={
+                  <PrivateRoute>
+                    <AdminPanel />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
+                path="/admin/marketplace" 
+                element={
+                  <PrivateRoute>
+                    <AdminPanel />
+                  </PrivateRoute>
+                } 
+              />
+        </Routes>
+      </ErrorBoundary>
+    </ProductionErrorBoundary>
   );
 };
 

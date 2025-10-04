@@ -8,6 +8,15 @@ import {
   ShoppingCart, UserCheck, Network, Layers, ArrowRightLeft,
   Package, Route, Smartphone, BatteryCharging, Gauge, Leaf
 } from 'lucide-react';
+import { 
+  AnimatedTruck, 
+  BouncingPackage, 
+  FloatingMapPin, 
+  SparklingStar, 
+  ParticleSystem, 
+  FloatingElements,
+  CartoonButton 
+} from './CartoonAnimations';
 
 const HeroSection = () => {
   const [currentStatIndex, setCurrentStatIndex] = useState(0);
@@ -40,30 +49,30 @@ const HeroSection = () => {
     },
   ];
 
-  // Enhanced features with African logistics focus
+  // Simplified features
   const features = [
     { 
       icon: <Route className="w-6 h-6" />, 
       text: 'AI Route Optimization', 
-      desc: 'Smart routing for African road conditions',
+      desc: 'Smart routing for Africa',
       highlight: true
     },
     { 
       icon: <Package className="w-6 h-6" />, 
-      text: 'Multi-Tier Supply Chain', 
-      desc: 'Connect producers to retailers seamlessly',
+      text: 'Supply Chain Integration', 
+      desc: 'End-to-end coordination',
       highlight: true
     },
     { 
       icon: <Smartphone className="w-6 h-6" />, 
-      text: 'Driver Mobile App', 
-      desc: 'Real-time tracking & updates',
+      text: 'Real-time Tracking', 
+      desc: 'Live updates & monitoring',
       highlight: false
     },
     { 
       icon: <BarChart className="w-6 h-6" />, 
-      text: 'Supply Chain Analytics', 
-      desc: 'Demand forecasting & insights',
+      text: 'Analytics Dashboard', 
+      desc: 'Performance insights',
       highlight: false
     },
   ];
@@ -86,6 +95,10 @@ const HeroSection = () => {
         {/* Gradient mesh */}
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-blue-500/10" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-300/20 via-transparent to-transparent" />
+        
+        {/* Cartoon-style floating elements */}
+        <FloatingElements />
+        <ParticleSystem count={15} />
         
         {/* Animated route visualization */}
         <svg className="absolute top-1/3 left-0 w-full h-1/3" viewBox="0 0 100 20" preserveAspectRatio="none">
@@ -118,29 +131,56 @@ const HeroSection = () => {
               transition={{ duration: 0.8 }}
               className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-900/30 text-emerald-400 border border-emerald-800 mb-4"
             >
-              <Zap className="mr-2 h-4 w-4" />
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Zap className="mr-2 h-4 w-4" />
+              </motion.div>
               AI-Powered African Logistics
             </motion.div>
             
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1 }}
+              transition={{ duration: 1, type: "spring", bounce: 0.3 }}
               className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight"
             >
-              <span className="block">Optimize Your African</span>
-              <span className="block mt-2 bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+              <motion.span 
+                className="block"
+                animate={{ 
+                  scale: [1, 1.02, 1],
+                }}
+                transition={{ 
+                  duration: 3, 
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                Optimize Your African
+              </motion.span>
+              <motion.span 
+                className="block mt-2 bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent"
+                animate={{ 
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{ 
+                  duration: 4, 
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
                 Supply Chain
-              </span>
+              </motion.span>
             </motion.h1>
             
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
-              className="mt-6 text-lg text-gray-300 max-w-2xl leading-relaxed"
+              className="mt-6 text-xl text-gray-300 max-w-2xl leading-relaxed"
             >
-              IntelliRoute Africa transforms logistics across the continent with intelligent routing, real-time tracking, and seamless coordination between <span className="text-emerald-400 font-semibold">producers, wholesalers, retailers, and transporters</span>. Reduce costs by up to 40% with our AI-powered platform.
+              AI-powered logistics platform connecting <span className="text-emerald-400 font-semibold">producers to consumers</span> across Africa. Reduce costs by 40% with smart routing.
             </motion.p>
 
             {/* Features List */}
@@ -151,35 +191,69 @@ const HeroSection = () => {
               className="mt-8 grid gap-4"
             >
               {features.map((feature, index) => (
-                <div key={index} className={`flex items-start p-3 rounded-lg ${feature.highlight ? 'bg-gray-800/50 border border-gray-700' : ''}`}>
-                  <div className={`flex-shrink-0 p-1.5 rounded-lg ${feature.highlight ? 'bg-emerald-500/20 text-emerald-400' : 'text-gray-400'}`}>
+                <motion.div 
+                  key={index} 
+                  className={`flex items-start p-3 rounded-lg ${feature.highlight ? 'bg-gray-800/50 border border-gray-700' : ''}`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    x: 5,
+                    transition: { duration: 0.2 }
+                  }}
+                >
+                  <motion.div 
+                    className={`flex-shrink-0 p-1.5 rounded-lg ${feature.highlight ? 'bg-emerald-500/20 text-emerald-400' : 'text-gray-400'}`}
+                    animate={{
+                      rotate: [0, 5, -5, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      delay: index * 0.5
+                    }}
+                  >
                     {feature.icon}
-                  </div>
+                  </motion.div>
                   <div className="ml-3">
                     <h4 className="text-gray-100 font-medium">{feature.text}</h4>
                     <p className="text-gray-400 text-sm mt-1">{feature.desc}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </motion.div>
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-lg shadow-lg shadow-emerald-500/20 transition-all duration-300 flex items-center"
+              <CartoonButton
+                onClick={() => window.location.href = '/register'}
+                variant="primary"
+                size="lg"
+                className="flex items-center justify-center"
               >
-                <span>Start Free Trial</span>
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-8 py-4 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-semibold rounded-lg transition-all duration-300 flex items-center"
+                <span>Get Started</span>
+                <motion.div
+                  animate={{ x: [0, 3, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </motion.div>
+              </CartoonButton>
+              
+              <CartoonButton
+                onClick={() => window.location.href = '/demo'}
+                variant="secondary"
+                size="lg"
+                className="flex items-center justify-center"
               >
-                <Play className="mr-2 h-5 w-5 text-teal-400" />
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Play className="mr-2 h-5 w-5 text-teal-400" />
+                </motion.div>
                 Watch Demo
-              </motion.button>
+              </CartoonButton>
             </div>
 
             {/* Stats */}
@@ -189,26 +263,68 @@ const HeroSection = () => {
               transition={{ duration: 1, delay: 0.6 }}
               className="mt-12 bg-gray-900/50 border border-gray-800 rounded-xl p-6 max-w-md"
             >
-              <div className="flex items-center mb-4">
-                <Gauge className="w-5 h-5 text-emerald-400 mr-2" />
+              <motion.div 
+                className="flex items-center mb-4"
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                >
+                  <Gauge className="w-5 h-5 text-emerald-400 mr-2" />
+                </motion.div>
                 <h3 className="text-lg font-semibold">Performance Metrics</h3>
-              </div>
+              </motion.div>
               <div className="grid grid-cols-2 gap-4">
                 {stats.map((stat, index) => (
-                  <div key={index} className={`p-3 rounded-lg ${index === currentStatIndex ? 'bg-gray-800 border border-gray-700' : ''}`}>
+                  <motion.div 
+                    key={index} 
+                    className={`p-3 rounded-lg ${index === currentStatIndex ? 'bg-gray-800 border border-gray-700' : ''}`}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ 
+                      opacity: 1, 
+                      scale: index === currentStatIndex ? 1.05 : 1,
+                      y: index === currentStatIndex ? -2 : 0
+                    }}
+                    transition={{ duration: 0.3 }}
+                    whileHover={{ scale: 1.02 }}
+                  >
                     <div className="flex items-center">
-                      <div className="p-1 bg-emerald-500/10 rounded-full mr-2">
+                      <motion.div 
+                        className="p-1 bg-emerald-500/10 rounded-full mr-2"
+                        animate={{
+                          scale: index === currentStatIndex ? [1, 1.2, 1] : 1,
+                          rotate: index === currentStatIndex ? [0, 5, -5, 0] : 0
+                        }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
                         {stat.icon}
-                      </div>
+                      </motion.div>
                       <div>
-                        <div className="text-xl font-bold text-emerald-400">{stat.value}</div>
+                        <motion.div 
+                          className="text-xl font-bold text-emerald-400"
+                          animate={{
+                            scale: index === currentStatIndex ? [1, 1.1, 1] : 1
+                          }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {stat.value}
+                        </motion.div>
                         <div className="text-sm text-gray-300">{stat.label}</div>
                       </div>
                     </div>
                     {index === currentStatIndex && (
-                      <div className="text-xs text-gray-400 mt-2">{stat.trend}</div>
+                      <motion.div 
+                        className="text-xs text-gray-400 mt-2"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {stat.trend}
+                      </motion.div>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -218,10 +334,20 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
+            transition={{ duration: 1, delay: 0.3, type: "spring", bounce: 0.2 }}
             className="mt-16 lg:mt-0 lg:w-1/2 relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-800 bg-gradient-to-br from-gray-900 to-gray-950">
+            <motion.div 
+              className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-800 bg-gradient-to-br from-gray-900 to-gray-950"
+              animate={{
+                boxShadow: [
+                  "0 25px 50px rgba(0,0,0,0.3)",
+                  "0 30px 60px rgba(0,0,0,0.4)",
+                  "0 25px 50px rgba(0,0,0,0.3)"
+                ]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
               <img 
                 src={dashboard_preview} 
                 alt="IntelliRoute Africa Dashboard" 
@@ -229,46 +355,101 @@ const HeroSection = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
               
-              {/* Floating elements with African context */}
+              {/* Cartoon-style floating elements */}
               <motion.div
                 className="absolute top-1/4 right-8 bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg w-48"
-                animate={{ y: [0, -10, 0] }}
+                animate={{ 
+                  y: [0, -10, 0],
+                  rotate: [0, 1, -1, 0],
+                  scale: [1, 1.02, 1]
+                }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                <div className="text-xs text-emerald-400 font-medium">Route Optimized</div>
+                <div className="flex items-center mb-2">
+                  <motion.div
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  >
+                    <FloatingMapPin size="sm" />
+                  </motion.div>
+                  <div className="text-xs text-emerald-400 font-medium ml-2">Route Optimized</div>
+                </div>
                 <div className="text-white font-bold mt-1">Nairobi → Kampala</div>
                 <div className="text-xs text-gray-400 mt-2">Saved 8 hours</div>
               </motion.div>
               
               <motion.div
                 className="absolute bottom-1/4 left-8 bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg w-56"
-                animate={{ y: [0, 10, 0] }}
+                animate={{ 
+                  y: [0, 10, 0],
+                  rotate: [0, -1, 1, 0],
+                  scale: [1, 1.02, 1]
+                }}
                 transition={{ duration: 4, repeat: Infinity, delay: 1 }}
               >
                 <div className="flex items-center">
-                  <div className="h-3 w-3 bg-emerald-400 rounded-full mr-2"></div>
+                  <motion.div 
+                    className="h-3 w-3 bg-emerald-400 rounded-full mr-2"
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      opacity: [0.7, 1, 0.7]
+                    }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  ></motion.div>
                   <div className="text-xs text-gray-300">Vehicle ETA</div>
                 </div>
                 <div className="text-white font-bold mt-1">KCD 123A • 2.5 hrs</div>
                 <div className="text-xs text-gray-400 mt-2">Malaba Border</div>
               </motion.div>
-            </div>
+
+              {/* Add cartoon characters */}
+              <div className="absolute top-8 left-8">
+                <AnimatedTruck size="sm" />
+              </div>
+              <div className="absolute top-12 right-12">
+                <BouncingPackage size="sm" />
+              </div>
+            </motion.div>
             
             {/* Trust badges */}
             <div className="absolute -bottom-4 left-0 right-0 flex justify-center gap-4">
-              <div className="flex items-center px-3 py-1.5 bg-gray-900 rounded-full border border-gray-800 shadow-lg text-sm">
-                <ShieldCheck className="h-4 w-4 text-emerald-400 mr-2" />
+              <motion.div 
+                className="flex items-center px-3 py-1.5 bg-gray-900 rounded-full border border-gray-800 shadow-lg text-sm"
+                animate={{
+                  y: [0, -2, 0],
+                  scale: [1, 1.02, 1]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <ShieldCheck className="h-4 w-4 text-emerald-400 mr-2" />
+                </motion.div>
                 <span className="font-medium">GDPR Compliant</span>
-              </div>
-              <div className="flex items-center px-3 py-1.5 bg-gray-900 rounded-full border border-gray-800 shadow-lg text-sm">
-                <Leaf className="h-4 w-4 text-green-400 mr-2" />
+              </motion.div>
+              <motion.div 
+                className="flex items-center px-3 py-1.5 bg-gray-900 rounded-full border border-gray-800 shadow-lg text-sm"
+                animate={{
+                  y: [0, -2, 0],
+                  scale: [1, 1.02, 1]
+                }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, -5, 5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Leaf className="h-4 w-4 text-green-400 mr-2" />
+                </motion.div>
                 <span className="font-medium">Carbon Neutral</span>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         </section>
 
-        {/* Multi-Tier Supply Chain Flow Section */}
+        {/* Supply Chain Flow Section */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -277,10 +458,10 @@ const HeroSection = () => {
         >
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              <span className="text-emerald-400">End-to-End</span> African Logistics
+              <span className="text-emerald-400">Complete</span> Supply Chain
             </h2>
-            <p className="text-gray-400 text-lg max-w-3xl mx-auto">
-              Connect every stage of your supply chain with our platform designed for Africa's unique challenges
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              From producers to consumers across Africa
             </p>
           </div>
 
@@ -293,35 +474,84 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 1.0 }}
               className="text-center flex-1 max-w-sm"
             >
-              <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
-                  <Factory className="w-10 h-10 text-white" />
-                </div>
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-400 rounded-full flex items-center justify-center">
+              <motion.div 
+                className="relative mb-6"
+                whileHover={{ scale: 1.05 }}
+                animate={{
+                  y: [0, -5, 0],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <motion.div 
+                  className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20"
+                  animate={{
+                    boxShadow: [
+                      "0 10px 25px rgba(16, 185, 129, 0.2)",
+                      "0 15px 35px rgba(16, 185, 129, 0.3)",
+                      "0 10px 25px rgba(16, 185, 129, 0.2)"
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <motion.div
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Factory className="w-10 h-10 text-white" />
+                  </motion.div>
+                </motion.div>
+                <motion.div 
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-400 rounded-full flex items-center justify-center"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 360]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
                   <span className="text-xs font-bold text-emerald-900">1</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">African Producers</h3>
+                </motion.div>
+              </motion.div>
+              <h3 className="text-xl font-semibold text-white mb-2">Producers</h3>
               <p className="text-gray-400 text-sm mb-4">Farmers & manufacturers</p>
-              <div className="space-y-2">
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></div>
-                  Bulk order management
-                </div>
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></div>
-                  Quality assurance
-                </div>
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></div>
-                  Cross-border documentation
-                </div>
+              <div className="space-y-1">
+                <motion.div 
+                  className="text-xs text-gray-300"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.2 }}
+                >
+                  • Bulk orders
+                </motion.div>
+                <motion.div 
+                  className="text-xs text-gray-300"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.3 }}
+                >
+                  • Quality control
+                </motion.div>
+                <motion.div 
+                  className="text-xs text-gray-300"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.4 }}
+                >
+                  • Documentation
+                </motion.div>
               </div>
             </motion.div>
 
             {/* Arrow 1 */}
             <div className="hidden md:flex justify-center">
-              <ArrowRight className="w-8 h-8 text-emerald-400" />
+              <motion.div
+                animate={{
+                  x: [0, 10, 0],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <ArrowRight className="w-8 h-8 text-emerald-400" />
+              </motion.div>
             </div>
 
             {/* Wholesaler */}
@@ -331,35 +561,84 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 1.1 }}
               className="text-center"
             >
-              <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
-                  <Building2 className="w-10 h-10 text-white" />
-                </div>
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center">
+              <motion.div 
+                className="relative mb-6"
+                whileHover={{ scale: 1.05 }}
+                animate={{
+                  y: [0, -5, 0],
+                }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+              >
+                <motion.div 
+                  className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20"
+                  animate={{
+                    boxShadow: [
+                      "0 10px 25px rgba(59, 130, 246, 0.2)",
+                      "0 15px 35px rgba(59, 130, 246, 0.3)",
+                      "0 10px 25px rgba(59, 130, 246, 0.2)"
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <motion.div
+                    animate={{ rotate: [0, -5, 5, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Building2 className="w-10 h-10 text-white" />
+                  </motion.div>
+                </motion.div>
+                <motion.div 
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 360]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
                   <span className="text-xs font-bold text-blue-900">2</span>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
               <h3 className="text-xl font-semibold text-white mb-2">Distributors</h3>
               <p className="text-gray-400 text-sm mb-4">Regional wholesalers</p>
-              <div className="space-y-2">
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                  Smart inventory routing
-                </div>
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                  Border clearance
-                </div>
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                  Last-mile coordination
-                </div>
+              <div className="space-y-1">
+                <motion.div 
+                  className="text-xs text-gray-300"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.3 }}
+                >
+                  • Smart routing
+                </motion.div>
+                <motion.div 
+                  className="text-xs text-gray-300"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.4 }}
+                >
+                  • Border clearance
+                </motion.div>
+                <motion.div 
+                  className="text-xs text-gray-300"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.5 }}
+                >
+                  • Last-mile delivery
+                </motion.div>
               </div>
             </motion.div>
 
             {/* Arrow 2 */}
             <div className="hidden md:flex justify-center">
-              <ArrowRight className="w-8 h-8 text-blue-400" />
+              <motion.div
+                animate={{
+                  x: [0, 10, 0],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+              >
+                <ArrowRight className="w-8 h-8 text-blue-400" />
+              </motion.div>
             </div>
 
             {/* Retailer */}
@@ -379,19 +658,10 @@ const HeroSection = () => {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Retailers</h3>
               <p className="text-gray-400 text-sm mb-4">Local shops & markets</p>
-              <div className="space-y-2">
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
-                  Automated replenishment
-                </div>
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
-                  M-Pesa integration
-                </div>
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
-                  Delivery tracking
-                </div>
+              <div className="space-y-1">
+                <div className="text-xs text-gray-300">• Auto replenishment</div>
+                <div className="text-xs text-gray-300">• Mobile payments</div>
+                <div className="text-xs text-gray-300">• Live tracking</div>
               </div>
             </motion.div>
 
@@ -417,19 +687,10 @@ const HeroSection = () => {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Transporters</h3>
               <p className="text-gray-400 text-sm mb-4">Fleet operators & drivers</p>
-              <div className="space-y-2">
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
-                  Route optimization
-                </div>
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
-                  Border wait times
-                </div>
-                <div className="flex items-center text-xs text-gray-300">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
-                  Fuel efficiency
-                </div>
+              <div className="space-y-1">
+                <div className="text-xs text-gray-300">• Route optimization</div>
+                <div className="text-xs text-gray-300">• Border efficiency</div>
+                <div className="text-xs text-gray-300">• Fuel savings</div>
               </div>
             </motion.div>
           </div>
@@ -441,29 +702,29 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 1.4 }}
             className="mt-16 text-center"
           >
-            <div className="bg-gradient-to-r from-emerald-900/20 to-blue-900/20 border border-emerald-800/30 rounded-2xl p-8 max-w-4xl mx-auto">
-              <h3 className="text-2xl font-bold text-white mb-4">
-                🌍 Built for Africa's Unique Challenges
+            <div className="bg-gradient-to-r from-emerald-900/20 to-blue-900/20 border border-emerald-800/30 rounded-2xl p-6 max-w-3xl mx-auto">
+              <h3 className="text-xl font-bold text-white mb-4">
+                🌍 Built for Africa
               </h3>
-              <p className="text-gray-300 text-lg mb-6">
-                Our platform addresses Africa-specific logistics pain points including border delays, road conditions, and fragmented supply chains with localized intelligence and real-time adaptation.
+              <p className="text-gray-300 text-base mb-6">
+                Solving border delays, road conditions, and supply chain fragmentation with AI-powered intelligence.
               </p>
-              <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <div className="flex flex-wrap justify-center gap-4 text-sm">
                 <div className="flex items-center text-emerald-400">
                   <MapPin className="w-4 h-4 mr-2" />
-                  Border crossing optimization
+                  Border optimization
                 </div>
                 <div className="flex items-center text-blue-400">
                   <BatteryCharging className="w-4 h-4 mr-2" />
-                  Fuel cost reduction
+                  Fuel savings
                 </div>
                 <div className="flex items-center text-purple-400">
                   <Clock className="w-4 h-4 mr-2" />
-                  Real-time ETA updates
+                  Real-time tracking
                 </div>
                 <div className="flex items-center text-orange-400">
                   <Network className="w-4 h-4 mr-2" />
-                  Multi-party coordination
+                  Smart coordination
                 </div>
               </div>
             </div>

@@ -14,7 +14,7 @@ const testimonials = [
     name: "Nego Adams",
     role: "Operations Manager, SwiftHaul Kenya",
     feedback:
-      "Intelliroute Africa has revolutionized how we manage our fleet. Real-time insights and predictive maintenance have saved us 35% in operational costs and improved on-time deliveries by 65%.",
+      "Revolutionary fleet management. Saved 35% in costs and improved on-time deliveries by 65%.",
     stats: [
       { value: "35%", label: "Cost Reduction" },
       { value: "65%", label: "On-time Delivery" }
@@ -24,7 +24,7 @@ const testimonials = [
     name: "Carolyne Benson",
     role: "Logistics Lead, FastMove Uganda",
     feedback:
-      "The dashboard is incredibly powerful. We've reduced delivery times by 40% and increased driver efficiency. The border crossing optimization alone saves us 8 hours per shipment.",
+      "Powerful dashboard reduced delivery times by 40%. Border optimization saves us 8 hours per shipment.",
     stats: [
       { value: "40%", label: "Faster Deliveries" },
       { value: "8hrs", label: "Border Time Saved" }
@@ -34,10 +34,10 @@ const testimonials = [
     name: "Den Orina",
     role: "CEO, Financia-Ke",
     feedback:
-      "Geo-fencing and smart alerts are game-changers! We now have complete visibility across 5 countries. Fuel consumption decreased by 25% with optimized routes.",
+      "Complete visibility across 5 countries. Fuel consumption decreased by 25% with optimized routes.",
     stats: [
       { value: "25%", label: "Fuel Savings" },
-      { value: "5", label: "Countries Covered" }
+      { value: "5", label: "Countries" }
     ]
   },
 ];
@@ -89,9 +89,9 @@ const TestimonialsSection = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-5xl font-bold text-center mb-6"
           >
-            <span className="block">Transforming Logistics Across Africa</span>
+            <span className="block">Success Stories</span>
             <span className="block mt-3 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
-              Real Results from Real Customers
+              Real Results from Customers
             </span>
           </motion.h2>
           
@@ -100,9 +100,9 @@ const TestimonialsSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-xl text-gray-600 max-w-3xl mx-auto"
+            className="text-xl text-gray-600 max-w-2xl mx-auto"
           >
-            Hear how logistics companies across Africa are achieving unprecedented efficiency and cost savings with our platform.
+            See how African logistics companies are achieving better efficiency and cost savings.
           </motion.p>
         </div>
 
@@ -199,7 +199,7 @@ const TestimonialsSection = () => {
             whileTap={{ scale: 0.98 }}
             className="px-8 py-4 bg-gradient-to-r from-gray-900 to-gray-800 text-white font-semibold rounded-lg shadow-lg flex items-center mx-auto"
           >
-            <span>Read More Success Stories</span>
+            <span>More Success Stories</span>
             <ChevronRight className="ml-2 h-5 w-5" />
           </motion.button>
         </motion.div>

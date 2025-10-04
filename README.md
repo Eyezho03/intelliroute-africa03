@@ -61,6 +61,7 @@ Our platform enables **ordering + delivery coordination** at every stage, transf
 ## 🛠️ Technical Stack
 
 - **Frontend**: React 18.3 + Vite
+- **Backend**: Express (REST) + ws (WebSockets)
 - **Styling**: Tailwind CSS + Framer Motion
 - **Maps**: Google Maps API + Leaflet
 - **Charts**: Chart.js for analytics
@@ -99,9 +100,12 @@ cd intelliroute-africa/Frontend
 # Install dependencies (with compatibility fixes)
 npm install --legacy-peer-deps
 
-# Start development server
+# Start full-stack development (frontend + backend)
 npm run dev
-# Runs on http://localhost:5173
+# Frontend: http://localhost:5173
+# REST API: http://localhost:5002/api
+# WS Notifications: ws://localhost:5001/ws
+# WS Mobile: ws://localhost:3001/mobile
 
 # Build for production
 npm run build

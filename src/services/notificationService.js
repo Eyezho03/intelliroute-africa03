@@ -26,7 +26,8 @@ class NotificationService {
   // Initialize WebSocket connection
   async connect(token) {
     try {
-      const wsUrl = `ws://localhost:5001/ws?token=${token}`;
+      const base = import.meta.env.VITE_WS_NOTIFICATIONS_URL || 'ws://localhost:5001/ws';
+      const wsUrl = `${base}?token=${token}`;
       this.socket = new WebSocket(wsUrl);
 
       return new Promise((resolve, reject) => {

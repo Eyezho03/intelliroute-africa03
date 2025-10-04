@@ -1,377 +1,295 @@
-// IntelliRoute Africa Service Worker
-// Provides offline functionality and intelligent caching
+const CACHE_NAME = 'intelliroute-africa-v1.0.0';
+const STATIC_CACHE = 'static-v1.0.0';
+const DYNAMIC_CACHE = 'dynamic-v1.0.0';
 
-const CACHE_NAME = 'intelliroute-v1.0.0';
-const STATIC_CACHE = 'intelliroute-static-v1.0.0';
-const DYNAMIC_CACHE = 'intelliroute-dynamic-v1.0.0';
-
-// Assets to cache immediately
+// Assets to cache on install
 const STATIC_ASSETS = [
   '/',
-  '/dashboard',
-  '/dashboard/ai',
-  '/dashboard/advanced-analytics',
+  '/index.html',
+  '/manifest.json',
   '/static/js/bundle.js',
   '/static/css/main.css',
-  '/manifest.json',
-  '/images/icon-192.png',
-  '/images/icon-512.png'
+  '/assets/intellirouteafrica5.jpg',
+  '/assets/intellirouteafrica3.jpg',
 ];
 
-// API endpoints that should be cached
-const CACHEABLE_APIS = [
-  '/api/analytics/live-vehicles',
-  '/api/analytics/kenyan-routes',
-  '/api/ai/recommendations',
-  '/api/users/me'
+// API endpoints to cache
+const API_CACHE_PATTERNS = [
+  /\/api\/routes/,
+  /\/api\/shipments/,
+  /\/api\/analytics/,
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker');
+  console.log('Service Worker: Installing...');
   
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then(cache => {
-        console.log('[SW] Caching static assets');
+      .then((cache) => {
+        console.log('Service Worker: Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log('[SW] Static assets cached successfully');
+        console.log('Service Worker: Static assets cached');
         return self.skipWaiting();
       })
-      .catch(err => {
-        console.error('[SW] Failed to cache static assets:', err);
+      .catch((error) => {
+        console.error('Service Worker: Failed to cache static assets', error);
       })
   );
 });
 
-// Activate event - cleanup old caches
+// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker');
+  console.log('Service Worker: Activating...');
   
   event.waitUntil(
     caches.keys()
-      .then(cacheNames => {
+      .then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter(cacheName => 
-              cacheName !== STATIC_CACHE && 
+            .filter((cacheName) => {
+              return cacheName !== STATIC_CACHE && 
               cacheName !== DYNAMIC_CACHE &&
-              cacheName !== CACHE_NAME
-            )
-            .map(cacheName => {
-              console.log('[SW] Deleting old cache:', cacheName);
+                     cacheName !== CACHE_NAME;
+            })
+            .map((cacheName) => {
+              console.log('Service Worker: Deleting old cache', cacheName);
               return caches.delete(cacheName);
             })
         );
       })
       .then(() => {
-        console.log('[SW] Service Worker activated');
+        console.log('Service Worker: Activated');
         return self.clients.claim();
       })
   );
 });
 
-// Fetch event - handle network requests with intelligent caching
+// Fetch event - implement caching strategies
 self.addEventListener('fetch', (event) => {
-  const request = event.request;
+  const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-HTTP requests
-  if (!request.url.startsWith('http')) {
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
     return;
   }
 
-  // Handle API requests
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(handleAPIRequest(request));
-    return;
+  // Handle different types of requests
+  if (url.origin === location.origin) {
+    // Same origin requests
+    event.respondWith(handleSameOriginRequest(request));
+  } else if (isApiRequest(request.url)) {
+    // API requests
+    event.respondWith(handleApiRequest(request));
+  } else if (isStaticAsset(request.url)) {
+    // Static assets
+    event.respondWith(handleStaticAsset(request));
+  } else {
+    // External requests
+    event.respondWith(handleExternalRequest(request));
   }
-
-  // Handle static assets and pages
-  event.respondWith(handleStaticRequest(request));
 });
 
-// Handle API requests with network-first strategy
-async function handleAPIRequest(request) {
-  const url = new URL(request.url);
-  
+// Handle same origin requests (HTML, JS, CSS)
+async function handleSameOriginRequest(request) {
   try {
-    // Try network first for fresh data
+    // Try cache first
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // Fetch from network
     const networkResponse = await fetch(request);
     
-    // Cache successful responses for cacheable endpoints
-    if (networkResponse.ok && shouldCacheAPI(url.pathname)) {
+    // Cache successful responses
+    if (networkResponse.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.error('Service Worker: Failed to handle same origin request', error);
+    
+    // Return offline page for navigation requests
+    if (request.mode === 'navigate') {
+      return caches.match('/offline.html') || new Response('Offline', {
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: { 'Content-Type': 'text/html' }
+      });
+    }
+    
+    throw error;
+  }
+}
+
+// Handle API requests with network-first strategy
+async function handleApiRequest(request) {
+  try {
+    // Try network first
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      // Cache successful API responses
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
     }
     
     return networkResponse;
   } catch (error) {
-    console.log('[SW] Network failed, trying cache for:', request.url);
+    console.log('Service Worker: Network failed for API request, trying cache');
     
-    // Fallback to cache
+    // Fall back to cache
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
     
-    // Return offline fallback for critical endpoints
-    if (url.pathname.includes('/api/users/me')) {
+    // Return offline response for API requests
       return new Response(JSON.stringify({
-        id: 'offline-user',
-        name: 'Offline User',
-        role: 'user',
-        isOffline: true
-      }), {
+      error: 'Offline',
+      message: 'You are currently offline. Please check your connection.'
+    }), {
+      status: 503,
+      statusText: 'Service Unavailable',
         headers: { 'Content-Type': 'application/json' }
       });
-    }
-    
-    if (url.pathname.includes('/api/analytics/')) {
-      return new Response(JSON.stringify({
-        activeVehicles: 0,
-        dailyDeliveries: 0,
-        savedCosts: 0,
-        efficiency: 0,
-        isOffline: true,
-        message: 'Offline mode - cached data unavailable'
-      }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    
-    throw error;
   }
 }
 
-// Handle static requests with cache-first strategy
-async function handleStaticRequest(request) {
-  // Try cache first for static assets
+// Handle static assets with cache-first strategy
+async function handleStaticAsset(request) {
+  try {
+    // Try cache first
   const cachedResponse = await caches.match(request);
   if (cachedResponse) {
     return cachedResponse;
   }
   
-  try {
-    // Try network for new assets
+    // Fetch from network
     const networkResponse = await fetch(request);
     
-    // Cache successful responses
     if (networkResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
+      const cache = await caches.open(STATIC_CACHE);
       cache.put(request, networkResponse.clone());
     }
     
     return networkResponse;
   } catch (error) {
-    // Return offline page for navigation requests
-    if (request.mode === 'navigate') {
-      const offlinePage = await caches.match('/offline.html');
-      if (offlinePage) {
-        return offlinePage;
-      }
-    }
-    
+    console.error('Service Worker: Failed to handle static asset', error);
     throw error;
   }
 }
 
-// Check if API endpoint should be cached
-function shouldCacheAPI(pathname) {
-  return CACHEABLE_APIs.some(api => pathname.includes(api));
+// Handle external requests
+async function handleExternalRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+    return networkResponse;
+  } catch (error) {
+    console.error('Service Worker: Failed to handle external request', error);
+    throw error;
+  }
+}
+
+// Helper functions
+function isApiRequest(url) {
+  return API_CACHE_PATTERNS.some(pattern => pattern.test(url));
+}
+
+function isStaticAsset(url) {
+  const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.woff', '.woff2', '.ttf'];
+  return staticExtensions.some(ext => url.includes(ext));
 }
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
-  console.log('[SW] Background sync triggered:', event.tag);
+  console.log('Service Worker: Background sync triggered', event.tag);
   
-  if (event.tag === 'chat-messages') {
-    event.waitUntil(syncChatMessages());
-  }
-  
-  if (event.tag === 'business-applications') {
-    event.waitUntil(syncBusinessApplications());
-  }
-  
-  if (event.tag === 'analytics-data') {
-    event.waitUntil(syncAnalyticsData());
+  if (event.tag === 'background-sync') {
+    event.waitUntil(doBackgroundSync());
   }
 });
 
-// Sync queued chat messages when online
-async function syncChatMessages() {
+async function doBackgroundSync() {
   try {
-    const queuedMessages = JSON.parse(localStorage.getItem('offline_chat_messages') || '[]');
+    // Get pending offline actions from IndexedDB
+    const pendingActions = await getPendingActions();
     
-    for (const message of queuedMessages) {
-      await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message)
-      });
-    }
-    
-    // Clear synced messages
-    localStorage.removeItem('offline_chat_messages');
-    console.log('[SW] Chat messages synced successfully');
+    for (const action of pendingActions) {
+      try {
+        await processOfflineAction(action);
+        await removePendingAction(action.id);
   } catch (error) {
-    console.error('[SW] Failed to sync chat messages:', error);
-  }
-}
-
-// Sync business applications submitted offline
-async function syncBusinessApplications() {
-  try {
-    const pendingApplications = JSON.parse(localStorage.getItem('pendingApplications') || '[]');
-    
-    for (const application of pendingApplications) {
-      const response = await fetch('/api/onboarding/business', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(application)
-      });
-      
-      if (response.ok) {
-        // Remove from pending queue
-        const updatedQueue = pendingApplications.filter(app => app.id !== application.id);
-        localStorage.setItem('pendingApplications', JSON.stringify(updatedQueue));
+        console.error('Service Worker: Failed to process offline action', error);
       }
     }
-    
-    console.log('[SW] Business applications synced successfully');
   } catch (error) {
-    console.error('[SW] Failed to sync business applications:', error);
+    console.error('Service Worker: Background sync failed', error);
   }
 }
 
-// Sync analytics data collection
-async function syncAnalyticsData() {
-  try {
-    const offlineAnalytics = JSON.parse(localStorage.getItem('offline_analytics') || '[]');
-    
-    for (const data of offlineAnalytics) {
-      await fetch('/api/analytics/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-    }
-    
-    localStorage.removeItem('offline_analytics');
-    console.log('[SW] Analytics data synced successfully');
-  } catch (error) {
-    console.error('[SW] Failed to sync analytics data:', error);
-  }
-}
-
-// Push notification handling
+// Push notifications
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received');
+  console.log('Service Worker: Push notification received');
   
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || 'IntelliRoute Africa';
   const options = {
-    body: data.body || 'New update available',
-    icon: '/images/icon-192.png',
-    badge: '/images/badge-72.png',
+    body: event.data ? event.data.text() : 'New notification from IntelliRoute Africa',
+    icon: '/assets/icon-192.png',
+    badge: '/assets/badge-72.png',
     vibrate: [200, 100, 200],
-    tag: data.tag || 'general',
+    data: {
+      url: '/dashboard'
+    },
     actions: [
       {
-        action: 'open',
-        title: 'View Details',
-        icon: '/images/action-open.png'
+        action: 'view',
+        title: 'View Dashboard',
+        icon: '/assets/icon-192.png'
       },
       {
-        action: 'dismiss',
-        title: 'Dismiss',
-        icon: '/images/action-dismiss.png'
+        action: 'close',
+        title: 'Close',
+        icon: '/assets/icon-192.png'
       }
-    ],
-    data: data
+    ]
   };
   
   event.waitUntil(
-    self.registration.showNotification(title, options)
+    self.registration.showNotification('IntelliRoute Africa', options)
   );
 });
 
-// Handle notification clicks
+// Notification click handler
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked:', event.action);
+  console.log('Service Worker: Notification clicked');
   
   event.notification.close();
   
-  if (event.action === 'open' || !event.action) {
-    const url = event.notification.data?.url || '/dashboard';
-    
+  if (event.action === 'view') {
     event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true })
-        .then(clientList => {
-          // Check if app is already open
-          for (const client of clientList) {
-            if (client.url.includes(url) && 'focus' in client) {
-              return client.focus();
-            }
-          }
-          
-          // Open new window
-          if (clients.openWindow) {
-            return clients.openWindow(url);
-          }
-        })
+      clients.openWindow('/dashboard')
     );
   }
 });
 
-// Periodic background sync for critical updates
-self.addEventListener('periodicsync', (event) => {
-  console.log('[SW] Periodic sync triggered:', event.tag);
-  
-  if (event.tag === 'update-critical-data') {
-    event.waitUntil(updateCriticalData());
-  }
-});
-
-// Update critical data in background
-async function updateCriticalData() {
-  try {
-    // Update vehicle statuses
-    const vehicleResponse = await fetch('/api/analytics/live-vehicles');
-    if (vehicleResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put('/api/analytics/live-vehicles', vehicleResponse.clone());
-    }
-    
-    // Update route data
-    const routeResponse = await fetch('/api/analytics/kenyan-routes');
-    if (routeResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put('/api/analytics/kenyan-routes', routeResponse.clone());
-    }
-    
-    console.log('[SW] Critical data updated successfully');
-  } catch (error) {
-    console.error('[SW] Failed to update critical data:', error);
-  }
+// Helper functions for offline actions (placeholder implementations)
+async function getPendingActions() {
+  // Implementation would read from IndexedDB
+  return [];
 }
 
-// Handle messages from the main app
-self.addEventListener('message', (event) => {
-  console.log('[SW] Message received:', event.data);
-  
-  if (event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-  
-  if (event.data.type === 'CACHE_ROUTE') {
-    const { url, data } = event.data;
-    caches.open(DYNAMIC_CACHE).then(cache => {
-      cache.put(url, new Response(JSON.stringify(data), {
-        headers: { 'Content-Type': 'application/json' }
-      }));
-    });
-  }
-});
+async function processOfflineAction(action) {
+  // Implementation would process the action when online
+  console.log('Processing offline action:', action);
+}
+
+async function removePendingAction(actionId) {
+  // Implementation would remove from IndexedDB
+  console.log('Removing pending action:', actionId);
+}

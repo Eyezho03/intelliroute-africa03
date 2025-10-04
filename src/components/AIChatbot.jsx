@@ -74,7 +74,7 @@ const AIChatbot = () => {
           <label className="block text-xs font-medium text-gray-600 mb-1">Business Name</label>
           <input 
             type="text" 
-            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-900"
             placeholder="Your business name"
           />
         </div>
@@ -84,7 +84,7 @@ const AIChatbot = () => {
             <label className="block text-xs font-medium text-gray-600 mb-1">Contact Person</label>
             <input 
               type="text" 
-              className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-900"
               placeholder="Full name"
             />
           </div>
@@ -92,7 +92,7 @@ const AIChatbot = () => {
             <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
             <input 
               type="tel" 
-              className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-900"
               placeholder="+254 xxx xxx xxx"
             />
           </div>
@@ -102,7 +102,7 @@ const AIChatbot = () => {
           <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
           <input 
             type="email" 
-            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-900"
             placeholder="business@email.com"
           />
         </div>
@@ -110,7 +110,7 @@ const AIChatbot = () => {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Business Type</label>
-            <select className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white">
+            <select className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white text-gray-900">
               {knowledgeBase.businessTypes.map(type => (
                 <option key={type} value={type}>{type}</option>
               ))}
@@ -120,7 +120,7 @@ const AIChatbot = () => {
             <label className="block text-xs font-medium text-gray-600 mb-1">Fleet Size</label>
             <input 
               type="number" 
-              className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-900"
               placeholder="Number of vehicles"
               min="1"
             />
@@ -130,7 +130,7 @@ const AIChatbot = () => {
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Location</label>
           <div className="grid grid-cols-2 gap-3">
-            <select className="px-3 py-2 border border-gray-300 rounded text-sm">
+            <select className="px-3 py-2 border border-gray-300 rounded text-sm text-gray-900">
               <option>Select County</option>
               <option>Nairobi</option>
               <option>Mombasa</option>
@@ -139,7 +139,7 @@ const AIChatbot = () => {
             </select>
             <input 
               type="text" 
-              className="px-3 py-2 border border-gray-300 rounded text-sm"
+              className="px-3 py-2 border border-gray-300 rounded text-sm text-gray-900"
               placeholder="Town"
             />
           </div>
@@ -924,9 +924,9 @@ I can help you with detailed information about:
                         <div className={`p-3 rounded-lg max-w-[70%] ${
                           message.type === 'user'
                             ? 'bg-blue-500 text-white rounded-br-none'
-                            : 'bg-white border rounded-bl-none shadow-sm'
+                            : 'bg-white border rounded-bl-none shadow-sm text-gray-900'
                         }`}>
-                          <p className="text-sm whitespace-pre-line">{message.content}</p>
+                          <p className="text-sm whitespace-pre-line text-gray-900">{message.content}</p>
                           
                           {/* Render form if present */}
                           {message.form === "onboarding" && renderOnboardingForm()}
@@ -937,14 +937,14 @@ I can help you with detailed information about:
                                 <button
                                   key={index}
                                   onClick={() => handleSendMessage(suggestion)}
-                                  className="block w-full text-left text-xs p-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                                  className="block w-full text-left text-xs p-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors text-gray-900"
                                 >
                                   {suggestion}
                                 </button>
                               ))}
                             </div>
                           )}
-                          <p className="text-xs opacity-70 mt-1 text-right">
+                          <p className="text-xs opacity-70 mt-1 text-right text-gray-600">
                             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -986,7 +986,7 @@ I can help you with detailed information about:
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       placeholder="Ask about IntelliRoute Africa..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                     />
                     <motion.button
                       whileHover={{ scale: 1.05 }}

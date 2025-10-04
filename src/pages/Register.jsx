@@ -17,7 +17,7 @@ const Register = () => {
     try {
       console.log('Registering user:', data);
       const userData = {
-        fullName: data.fullName,
+        name: data.fullName,
         email: data.email,
         password: data.password,
         role: data.role
@@ -52,7 +52,7 @@ const Register = () => {
               type="text"
               {...registerForm('fullName', { required: 'Full Name is required' })}
               placeholder="Enter your full name"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
             />
             {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName.message}</p>}
           </div>
@@ -63,7 +63,7 @@ const Register = () => {
               type="email"
               {...registerForm('email', { required: 'Email is required' })}
               placeholder="Enter your email"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
             />
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
           </div>
